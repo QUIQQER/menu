@@ -1191,6 +1191,10 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
          * mode: 'push' (manual) or 'replace' (auto)
          */
         $updateUrl: function (slug, mode) {
+            // Only update the URL on manual user interaction
+            if (mode !== 'push') {
+                return;
+            }
             try {
                 const urlObj = new URL(window.location.href);
                 if (slug) {
@@ -1199,11 +1203,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                     urlObj.searchParams.delete('open');
                 }
                 urlObj.hash = '';
-                if (mode === 'replace') {
-                    history.replaceState(null, null, urlObj.toString());
-                } else {
-                    history.pushState(null, null, urlObj.toString());
-                }
+                history.pushState(null, null, urlObj.toString());
             } catch (e) {}
         },
 

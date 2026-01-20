@@ -70,6 +70,10 @@
     position: relative;
 }
 
+.quiqqer-tabsAdvanced-nav-link:hover {
+    color: hsl(from var(--_qui-menu-controls-tabs-accentColor, var(--qui-colors-primary)) h s calc(l - 10));
+}
+
 .quiqqer-tabsAdvanced-nav-link img {
     height: var(--_qui-menu-controls-tabs-navImgHeight, 20px);
     vertical-align: middle;
@@ -88,7 +92,7 @@
     white-space: nowrap;
 }
 
-.active > .quiqqer-tabsAdvanced-nav-link {
+:where(.active) > .quiqqer-tabsAdvanced-nav-link {
     color: var(--_qui-menu-controls-tabs-accentColor, var(--qui-colors-primary));
 }
 
@@ -100,7 +104,7 @@
     bottom: 0;
     height: 4px;
     border-radius: 2px;
-    background: rgba(0, 0, 0, 0.06); /* Track */
+    background-color: color-mix(in srgb, var(--qui-colors-body, rgb(0 0 0)) 8%, transparent); /* Track */
     overflow: hidden;
 }
 
