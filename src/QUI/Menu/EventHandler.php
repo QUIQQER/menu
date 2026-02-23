@@ -56,11 +56,12 @@ class EventHandler
      */
     public static function onSmartyInit(Smarty $Smarty): void
     {
-        if (
-            !isset($Smarty->registered_plugins['function'])
-            || !isset($Smarty->registered_plugins['function']['menu'])
-        ) {
+        if (!isset($Smarty->registered_plugins['function']['menu'])) {
             $Smarty->registerPlugin("function", "menu", "\\QUI\\Menu\\Independent\\Smarty::menu");
+        }
+
+        if (!isset($Smarty->registered_classes['QUI\Utils\Security\Orthos'])) {
+            $Smarty->registerClass('QUI\Utils\Security\Orthos', '\QUI\Utils\Security\Orthos');
         }
     }
 
