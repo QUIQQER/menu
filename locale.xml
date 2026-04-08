@@ -139,6 +139,10 @@
             <en><![CDATA[Menu: Sidebar Navigation]]></en>
             <pl><![CDATA[Menu: Nawigacja boczna]]></pl>
         </locale>
+        <locale name="menu.control.sidebarDropDownMenu.description">
+            <de><![CDATA[Zeigt eine mehrstufige Navigation als Sidebar-Menü an. Alternativ kann statt der Seitenstruktur auch ein unabhängiges Menü verwendet werden.]]></de>
+            <en><![CDATA[Displays a multi-level navigation as a sidebar menu. Alternatively, an independent menu can be used instead of the page structure.]]></en>
+        </locale>
 
         <locale name="menu.control.sidebarDropDownMenu.setting.display">
             <de><![CDATA[Layout]]></de>
@@ -159,6 +163,14 @@
             <de><![CDATA[Start-ID]]></de>
             <en><![CDATA[Start ID]]></en>
             <pl><![CDATA[Pierwsza strona]]></pl>
+        </locale>
+        <locale name="menu.control.sidebarDropDownMenu.setting.menuId">
+            <de><![CDATA[Menü-ID]]></de>
+            <en><![CDATA[Menu ID]]></en>
+        </locale>
+        <locale name="menu.control.sidebarDropDownMenu.setting.menuId.desc">
+            <de><![CDATA[Wähle ein unabhängiges Menü aus. Wenn eine Menü-ID gesetzt ist, wird dieses Menü anstelle der Seitenstruktur verwendet.]]></de>
+            <en><![CDATA[Select an independent menu. If a menu ID is set, this menu is used instead of the page structure.]]></en>
         </locale>
         <locale name="menu.control.sidebarDropDownMenu.setting.parentLink">
             <de><![CDATA[Eltern-Seite Link anzeigen]]></de>
@@ -307,6 +319,10 @@
             <en><![CDATA[Menu: Navigation Tabs (vertical)]]></en>
         </locale>
         <locale name="control.navTabsVertical.description">
+            <de><![CDATA[Vertikale Menüeinträge. Der Inhalt ist neben dem Menü angezeigt.]]></de>
+            <en><![CDATA[Vertical menu items. The content is next to the menu items.]]></en>
+        </locale>
+        <locale name="control.verticalTabSwitcher.description">
             <de><![CDATA[Vertikale Menüeinträge. Der Inhalt ist neben dem Menü angezeigt.]]></de>
             <en><![CDATA[Vertical menu items. The content is next to the menu items.]]></en>
         </locale>
@@ -671,6 +687,10 @@
             <en><![CDATA[Menu: Submenu]]></en>
         </locale>
         <locale name="bricks.submenu.desc">
+            <de><![CDATA[Platziere auf deiner Seite eine Subnavigation. Dadurch kann innerhalb der Seite gescrollt oder zu anderen Unterseiten verlinkt werden.]]></de>
+            <en><![CDATA[Place a sub-navigation on your page. This allows you to scroll within the page or link to other subpages.]]></en>
+        </locale>
+        <locale name="bricks.submenu.description">
             <de><![CDATA[Platziere auf deiner Seite eine Subnavigation. Dadurch kann innerhalb der Seite gescrollt oder zu anderen Unterseiten verlinkt werden.]]></de>
             <en><![CDATA[Place a sub-navigation on your page. This allows you to scroll within the page or link to other subpages.]]></en>
         </locale>
