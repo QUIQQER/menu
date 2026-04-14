@@ -57,22 +57,28 @@ class SidebarDropDownMenu extends QUI\Control
         $Engine = QUI::getTemplateManager()->getEngine();
         $Project = $this->getProject();
         $activeId = false;
-
-        // start
-        try {
-            $startId = $this->getAttribute('startId');
-
-            if (Utils::isSiteLink($startId)) {
-                $Site = Utils::getSiteByLink($startId);
-            } else {
-                $Site = $Project->get((int)$startId);
-            }
-        } catch (QUI\Exception $Exception) {
-            QUI\System\Log::addWarning($Exception->getMessage());
-
-            return '';
-        }
+        $menuId = $this->getAttribute('menuId');
+        $Site = QUI::getRewrite()->getSite();
         $FirstPage = $Site;
+
+        if (!$menuId) {
+            // start
+            try {
+                $startId = $this->getAttribute('startId');
+
+                if (Utils::isSiteLink($startId)) {
+                    $Site = Utils::getSiteByLink($startId);
+                } else {
+                    $Site = $Project->get((int)$startId);
+                }
+            } catch (QUI\Exception $Exception) {
+                QUI\System\Log::addWarning($Exception->getMessage());
+
+                return '';
+            }
+
+            $FirstPage = $Site;
+        }
 
 
         // active site
@@ -89,8 +95,8 @@ class SidebarDropDownMenu extends QUI\Control
             $levels = false;
         }
 
-        if ($this->getAttribute('menuId')) {
-            $IndependentMenu = Independent\Handler::getMenu($this->getAttribute('menuId'));
+        if ($menuId) {
+            $IndependentMenu = Independent\Handler::getMenu($menuId);
 
             $children = $IndependentMenu->getChildren();
 
