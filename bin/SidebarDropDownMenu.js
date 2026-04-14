@@ -80,7 +80,8 @@ define('package/quiqqer/menu/bin/SidebarDropDownMenu', [
         openMenu: function (NavSubLeft)
         {
             var Prev = NavSubLeft.getPrevious('.quiqqer-navigation-entry'),
-                Icon = Prev.getChildren('.quiqqer-fa-levels-icon');
+                Icon = Prev.getChildren('.quiqqer-fa-levels-icon'),
+                List = NavSubLeft.getElement("ul");
 
             if (Icon.hasClass('fa-angle-double-right')) {
                 Icon.addClass("fa-nav-levels-rotate");
@@ -88,21 +89,34 @@ define('package/quiqqer/menu/bin/SidebarDropDownMenu', [
 
             return new Promise(function (resolve)
             {
+                if (List) {
+                    List.setStyle("display", "flow-root");
+                }
+
                 NavSubLeft.setStyles({
-                    height  : 0,
+                    height  : "auto",
                     opacity : 0,
                     overflow: "hidden",
                     display : "block"
                 });
 
+                var targetHeight = NavSubLeft.getScrollSize().y.toInt();
+
+                NavSubLeft.setStyle("height", 0);
+
                 moofx(NavSubLeft).animate({
-                    height : NavSubLeft.getElement("ul").getSize().y.toInt(),
+                    height : targetHeight,
                     opacity: 1
                 }, {
                     duration: 200,
                     callback: function ()
                     {
                         NavSubLeft.setStyle('height', null);
+                        NavSubLeft.setStyle('overflow', null);
+
+                        if (List) {
+                            List.setStyle("display", null);
+                        }
 
                         resolve();
                     }
