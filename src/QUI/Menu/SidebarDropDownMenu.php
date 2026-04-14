@@ -72,13 +72,7 @@ class SidebarDropDownMenu extends QUI\Control
 
             return '';
         }
-
-
-        if ($Site->getId() != 1) {
-            $FirstPage = $Site->getParent();
-        } else {
-            $FirstPage = $this->getProject()->firstChild();
-        }
+        $FirstPage = $Site;
 
 
         // active site
