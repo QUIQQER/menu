@@ -20,43 +20,24 @@
 
 {strip}
 
-    {if count( $children )}
+    {if count($children)}
         <ul class="quiqqer-navigation-level-{$level}" data-name="menu-list">
-            {*if $parentLink}
-                {if $level == 1}
-                <li class="quiqqer-navigation-li" data-name="menu-item">
-                    <div class="quiqqer-navigation-entry">
-                        {if $parentIcon}
-                            <i class="fa quiqqer-fa-list-icon fa-fw {$parentIcon}"></i>
-                        {/if}
-                        <a href="{url site=$FirstPage}" class="quiqqer-navigation-firstpage quiqqer-navigation-link">
-                            {$FirstPage->getAttribute('title')}
-                        </a>
-                    </div>
-                </li>
-                {/if}
-            {/if*}
             {foreach from=$children item=Child}
-                {assign var=siteObj value=0}
-                {if $Child|get_class === 'QUI\Menu\Independent\Items\Site'}
-                    {assign var=siteObj value=1}
-                {/if}
                 <li class="quiqqer-navigation-li" data-name="menu-item">
                     {assign var=subnavigation value=$Child->getChildren()}
                     <div class="quiqqer-navigation-entry">
-                        {if count ( $subnavigation ) && ($level < $levels || $levels == 0)}
-                            {if $levelIcon}
-                                <span class="fa quiqqer-fa-list-icon fa-fw {$levelIcon} quiqqer-fa-levels-icon" data-name="menu-toggle"></span>
-                            {/if}
-                        {else}
-                            {if $listIcon}
-                                <i class="fa quiqqer-fa-list-icon fa-fw {$listIcon}"></i>
-                            {/if}
+                        {assign var=showAllIcons value=true}
+                        {if $onlyFirstLevelIcons && $level > 1}
+                            {assign var=showAllIcons value=false}
+                        {/if}
+
+                        {if $showAllIcons && $listType == 'fontAwesome' && $listIcon}
+                            <i class="fa quiqqer-fa-list-icon fa-fw {$listIcon}"></i>
                         {/if}
 
                         {if $Child->getUrl()}
                             <a href="{$Child->getUrl()}" class="quiqqer-navigation-link
-                   {if !count($subnavigation)} quiqqer-navigation-link-no-icon{/if}"
+                                {if !count($subnavigation)} quiqqer-navigation-link-no-icon{/if}"
                                title="{$Child->getTitleAttribute()|escape:'html'}"
                                {if $Child->getTarget()}target="{$Child->getTarget()}"{/if}>
                                 {$Child->getTitle()}
@@ -66,6 +47,10 @@
                                   title="{$Child->getTitleAttribute()|escape:'html'}">
                                 {$Child->getTitle()}
                             </span>
+                        {/if}
+
+                        {if count($subnavigation) && ($level < $levels || $levels == 0)}
+                            <i class="fa quiqqer-fa-levels-icon {$levelIcon}" data-name="menu-toggle"></i>
                         {/if}
                     </div>
 
@@ -102,7 +87,7 @@
 
         if (ParentLi) {
             ParentLi.classList.add('open');
-            const Icon = ParentLi.querySelector('.quiqqer-fa-list-icon');
+            const Icon = ParentLi.querySelector('.quiqqer-fa-levels-icon');
 
             if (Icon) {
                 Icon.classList.add('fa-nav-levels-rotate');
@@ -125,11 +110,11 @@
 
             Item.classList.add('quiqqer-navigation-link--active');
 
-            const Icon = LiElm.querySelector('.quiqqer-fa-list-icon');
+            const Icon = LiElm.querySelector('.quiqqer-fa-levels-icon');
             if (Icon) {
                 Icon.classList.add('fa-nav-levels-rotate');
             }
-            
+
             setPath(LiElm);
         }
     });
