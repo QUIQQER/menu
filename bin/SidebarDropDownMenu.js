@@ -79,6 +79,13 @@ define('package/quiqqer/menu/bin/SidebarDropDownMenu', [
          */
         openMenu: function (NavSubLeft)
         {
+            var Prev = NavSubLeft.getPrevious('.quiqqer-navigation-entry'),
+                Icon = Prev.getChildren('.quiqqer-fa-levels-icon');
+
+            if (Icon.hasClass('fa-angle-double-right')) {
+                Icon.addClass("fa-nav-levels-rotate");
+            }
+
             return new Promise(function (resolve)
             {
                 NavSubLeft.setStyles({
@@ -95,14 +102,7 @@ define('package/quiqqer/menu/bin/SidebarDropDownMenu', [
                     duration: 200,
                     callback: function ()
                     {
-                        NavSubLeft.setStyle('height', '100%');
-
-                        var Prev = NavSubLeft.getPrevious('.quiqqer-navigation-entry'),
-                            Icon = Prev.getChildren('.quiqqer-fa-levels-icon');
-
-                        if (Icon.hasClass('fa-angle-double-right')) {
-                            Icon.addClass("fa-nav-levels-rotate");
-                        }
+                        NavSubLeft.setStyle('height', null);
 
                         resolve();
                     }
@@ -119,6 +119,11 @@ define('package/quiqqer/menu/bin/SidebarDropDownMenu', [
          */
         closeMenu: function (NavSubLeft)
         {
+            var Prev = NavSubLeft.getPrevious('.quiqqer-navigation-entry'),
+                Icon = Prev.getChildren('.quiqqer-fa-levels-icon');
+
+            Icon.removeClass("fa-nav-levels-rotate");
+
             return new Promise(function (resolve)
             {
                 NavSubLeft.setStyle("overflow", "hidden");
@@ -131,10 +136,6 @@ define('package/quiqqer/menu/bin/SidebarDropDownMenu', [
                     duration: 200,
                     callback: function ()
                     {
-                        var Prev = NavSubLeft.getPrevious('.quiqqer-navigation-entry'),
-                            Icon = Prev.getChildren('.quiqqer-fa-levels-icon');
-
-                        Icon.removeClass("fa-nav-levels-rotate");
                         resolve();
                     }
                 });

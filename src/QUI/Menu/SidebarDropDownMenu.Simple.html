@@ -6,9 +6,7 @@
 
 {if $level == 1}
     {if $this->getAttribute('showTitle') && $this->getAttribute('frontendTitle')}
-        <header class="control-header">
-        <h1>{$this->getAttribute('frontendTitle')}</h1>
-        </header>
+        <h2 class="control-header">{$this->getAttribute('frontendTitle')}</h2>
     {/if}
 
     {if $this->getAttribute('content') != ""}
@@ -38,7 +36,7 @@
         {/if}
     {/if}
     {foreach from=$children item=Child}
-    <li class="quiqqer-navigation-li {if $Rewrite->isIdInPath($Child->getId())} active-bgcolor {/if}">
+    <li class="quiqqer-navigation-li {if $Rewrite->isIdInPath($Child->getId())} quiqqer-navigation-li--active {/if}  {if $Rewrite->isIdInPath($Child->getId()) && $activeId != $Child->getId() && $level == 1} quiqqer-navigation-li--firstLevel--active{/if}">
         {assign var=subnavigation value=$this->getChildren($Child)}
 
         <div class="quiqqer-navigation-entry
@@ -46,9 +44,9 @@
                 $Rewrite->isIdInPath($Child->getId()) &&
                 $activeId != $Child->getId() &&
                 $level == 1
-            } quiqqer-first-li-bg{/if}
+            } quiqqer-navigation-entry--firstLevel--active{/if}
 
-            {if $activeId == $Child->getId()} quiqqer-navigation-active{/if}">
+            {if $activeId == $Child->getId()} quiqqer-navigation-active quiqqer-navigation-entry--active{/if}">
 
             {if count ( $subnavigation ) && ($level < $levels || $levels == 0)}
                 {if $levelIcon}
@@ -62,7 +60,9 @@
             {/if}
 
             <a href="{url site=$Child}" class="quiqqer-navigation-link
-            {if !count($subnavigation)} quiqqer-navigation-link-no-icon{/if}">
+            {if !count($subnavigation)} quiqqer-navigation-link-no-icon{/if}
+            {if $activeId == $Child->getId()} quiqqer-navigation-link--active{/if}"
+            >
                 {$Child->getAttribute('title')}
             </a>
         </div>
