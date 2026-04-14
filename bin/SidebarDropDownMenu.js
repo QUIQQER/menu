@@ -40,7 +40,7 @@ define('package/quiqqer/menu/bin/SidebarDropDownMenu', [
         $onImport: function ()
         {
             const Parent = this.getElm();
-            const ToggleButtons = Parent.querySelectorAll(".quiqqer-fa-levels-icon");
+            const ToggleButtons = Parent.querySelectorAll('[data-name="menu-toggle"]');
             let runs = false;
 
             ToggleButtons.forEach((ToggleButton) => {
@@ -49,13 +49,13 @@ define('package/quiqqer/menu/bin/SidebarDropDownMenu', [
                         return;
                     }
 
-                    const LiLeft = ToggleButton.closest("li");
+                    const LiLeft = ToggleButton.closest('[data-name="menu-item"]');
 
                     if (!LiLeft) {
                         return;
                     }
 
-                    const NavSubLeft = LiLeft.querySelector("div.quiqqer-sub-nav-div");
+                    const NavSubLeft = LiLeft.querySelector('[data-name="submenu"]');
 
                     if (!NavSubLeft) {
                         return;
@@ -88,9 +88,9 @@ define('package/quiqqer/menu/bin/SidebarDropDownMenu', [
         openMenu: function (NavSubLeft)
         {
             const Prev = NavSubLeft.previousElementSibling;
-            const Icon = Prev ? Prev.querySelector('.quiqqer-fa-levels-icon') : null;
-            const List = NavSubLeft.querySelector("ul");
-            const ParentLi = NavSubLeft.closest("li");
+            const Icon = Prev ? Prev.querySelector('[data-name="menu-toggle"]') : null;
+            const List = NavSubLeft.querySelector('[data-name="menu-list"]');
+            const ParentLi = NavSubLeft.closest('[data-name="menu-item"]');
 
             if (Icon && Icon.classList.contains('fa-angle-double-right')) {
                 Icon.classList.add("fa-nav-levels-rotate");
@@ -143,8 +143,8 @@ define('package/quiqqer/menu/bin/SidebarDropDownMenu', [
         closeMenu: function (NavSubLeft)
         {
             const Prev = NavSubLeft.previousElementSibling;
-            const Icon = Prev ? Prev.querySelector('.quiqqer-fa-levels-icon') : null;
-            const ParentLi = NavSubLeft.closest("li");
+            const Icon = Prev ? Prev.querySelector('[data-name="menu-toggle"]') : null;
+            const ParentLi = NavSubLeft.closest('[data-name="menu-item"]');
 
             if (Icon) {
                 Icon.classList.remove("fa-nav-levels-rotate");

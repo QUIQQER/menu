@@ -21,9 +21,9 @@
 {strip}
 
     {if count($children)}
-        <ul class="quiqqer-navigation-level-{$level}">
+        <ul class="quiqqer-navigation-level-{$level}" data-name="menu-list">
             {foreach from=$children item=Child}
-                <li class="quiqqer-navigation-li">
+                <li class="quiqqer-navigation-li" data-name="menu-item">
                     {assign var=subnavigation value=$Child->getChildren()}
                     <div class="quiqqer-navigation-entry">
                         {assign var=showAllIcons value=true}
@@ -50,12 +50,12 @@
                         {/if}
 
                         {if count($subnavigation) && ($level < $levels || $levels == 0)}
-                            <i class="fa quiqqer-fa-levels-icon {$levelIcon}"></i>
+                            <i class="fa quiqqer-fa-levels-icon {$levelIcon}" data-name="menu-toggle"></i>
                         {/if}
                     </div>
 
                     {if $levels === false || $levels-1 >= $level}
-                        <div class="quiqqer-sub-nav-div">
+                        <div class="quiqqer-sub-nav-div" data-name="submenu">
                             {include file=$navTemplate
                             children=$Child->getChildren()
                             level=$level

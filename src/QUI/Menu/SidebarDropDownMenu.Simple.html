@@ -20,7 +20,7 @@
 {assign var=children value=$this->getChildren($Site)}
 
 {if count( $children )}
-<ul class="quiqqer-navigation-level-{$level}">
+<ul class="quiqqer-navigation-level-{$level}" data-name="menu-list">
     {if $parentLink}
         {if $level == 1}
         <li class="quiqqer-navigation-li">
@@ -36,7 +36,7 @@
         {/if}
     {/if}
     {foreach from=$children item=Child}
-    <li class="quiqqer-navigation-li {if $Rewrite->isIdInPath($Child->getId())} quiqqer-navigation-li--active {/if}  {if $Rewrite->isIdInPath($Child->getId()) && $activeId != $Child->getId() && $level == 1} quiqqer-navigation-li--firstLevel--active{/if}">
+    <li class="quiqqer-navigation-li {if $Rewrite->isIdInPath($Child->getId())} quiqqer-navigation-li--active {/if}  {if $Rewrite->isIdInPath($Child->getId()) && $activeId != $Child->getId() && $level == 1} quiqqer-navigation-li--firstLevel--active{/if}" data-name="menu-item">
         {assign var=subnavigation value=$this->getChildren($Child)}
 
         <div class="quiqqer-navigation-entry
@@ -51,7 +51,7 @@
             {if count ( $subnavigation ) && ($level < $levels || $levels == 0)}
                 {if $levelIcon}
                     <i class="fa quiqqer-fa-list-icon fa-fw {$levelIcon} quiqqer-fa-levels-icon
-                        {if $Rewrite->isIdInPath($Child->getId())} fa-nav-levels-rotate{/if}"></i>
+                        {if $Rewrite->isIdInPath($Child->getId())} fa-nav-levels-rotate{/if}" data-name="menu-toggle"></i>
                 {/if}
             {else}
                 {if $listIcon}
@@ -68,7 +68,7 @@
         </div>
 
         {if $levels === false || $levels-1 >= $level}
-        <div class="quiqqer-sub-nav-div {if !$Rewrite->isIdInPath($Child->getId())}quiqqer-navigation-close{/if}">
+        <div class="quiqqer-sub-nav-div {if !$Rewrite->isIdInPath($Child->getId())}quiqqer-navigation-close{/if}" data-name="submenu">
             {include file=$navTemplate
                 Site=$Child
                 level=$level

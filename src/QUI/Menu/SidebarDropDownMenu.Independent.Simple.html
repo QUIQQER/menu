@@ -21,10 +21,10 @@
 {strip}
 
     {if count( $children )}
-        <ul class="quiqqer-navigation-level-{$level}">
+        <ul class="quiqqer-navigation-level-{$level}" data-name="menu-list">
             {*if $parentLink}
                 {if $level == 1}
-                <li class="quiqqer-navigation-li">
+                <li class="quiqqer-navigation-li" data-name="menu-item">
                     <div class="quiqqer-navigation-entry">
                         {if $parentIcon}
                             <i class="fa quiqqer-fa-list-icon fa-fw {$parentIcon}"></i>
@@ -41,12 +41,12 @@
                 {if $Child|get_class === 'QUI\Menu\Independent\Items\Site'}
                     {assign var=siteObj value=1}
                 {/if}
-                <li class="quiqqer-navigation-li">
+                <li class="quiqqer-navigation-li" data-name="menu-item">
                     {assign var=subnavigation value=$Child->getChildren()}
                     <div class="quiqqer-navigation-entry">
                         {if count ( $subnavigation ) && ($level < $levels || $levels == 0)}
                             {if $levelIcon}
-                                <span class="fa quiqqer-fa-list-icon fa-fw {$levelIcon} quiqqer-fa-levels-icon"></span>
+                                <span class="fa quiqqer-fa-list-icon fa-fw {$levelIcon} quiqqer-fa-levels-icon" data-name="menu-toggle"></span>
                             {/if}
                         {else}
                             {if $listIcon}
@@ -70,7 +70,7 @@
                     </div>
 
                     {if $levels === false || $levels-1 >= $level}
-                        <div class="quiqqer-sub-nav-div">
+                        <div class="quiqqer-sub-nav-div" data-name="submenu">
                             {include file=$navTemplate
                             children=$Child->getChildren()
                             level=$level
