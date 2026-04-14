@@ -60,11 +60,19 @@
                 <setting name="onlyFirstLevelIcons" type="checkbox">
                     <locale group="quiqqer/menu"
                             var="menu.control.sidebarDropDownMenu.setting.onlyFirstLevelIcons"/>
+                    <description>
+                        <locale group="quiqqer/menu"
+                                var="menu.control.sidebarDropDownMenu.setting.onlyFirstLevelIcons.desc"/>
+                    </description>
                 </setting>
 
                 <setting name="listType" type="select">
                     <locale group="quiqqer/menu"
                             var="menu.control.sidebarDropDownMenu.setting.listType"/>
+                    <description>
+                        <locale group="quiqqer/menu"
+                                var="menu.control.sidebarDropDownMenu.setting.listType.desc"/>
+                    </description>
 
                     <option value="fontAwesome">
                         <locale group="quiqqer/menu"

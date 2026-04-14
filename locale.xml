@@ -184,6 +184,10 @@
             <de><![CDATA[Icons nur der erste Ebene anzeigen]]></de>
             <en><![CDATA[Show icons only on first level]]></en>
         </locale>
+        <locale name="menu.control.sidebarDropDownMenu.setting.onlyFirstLevelIcons.desc">
+            <de><![CDATA[Funktioniert nur mit Layout "Erweitert"]]></de>
+            <en><![CDATA[Works only with layout "Advanced"]]></en>
+        </locale>
 
         <locale name="menu.control.sidebarDropDownMenu.setting.listType">
             <de><![CDATA[Listenformatierung]]></de>
@@ -200,6 +204,10 @@
         <locale name="menu.control.sidebarDropDownMenu.setting.listType.none">
             <de><![CDATA[Ohne]]></de>
             <en><![CDATA[None]]></en>
+        </locale>
+        <locale name="menu.control.sidebarDropDownMenu.setting.listType.desc">
+            <de><![CDATA[Funktioniert nur mit Layout "Erweitert"]]></de>
+            <en><![CDATA[Works only with layout "Advanced"]]></en>
         </locale>
         <locale name="menu.control.sidebarDropDownMenu.setting.showAllChildren">
             <de><![CDATA[Auch Seiten anzeigen welche die Eigenschaft nicht in Navigation anzeigen besitzen.]]></de>

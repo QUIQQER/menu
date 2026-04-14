@@ -1,3 +1,7 @@
+.quiqqer-sidebar-dropdown-navigation {
+    --entry-gap: var(--quiqqer-menu-sidebarDropdownMenu-entry-gap, 0.75rem);
+}
+
 .quiqqer-sidebar-dropdown-navigation ul,
 .quiqqer-sidebar-dropdown-navigation ul li {
     list-style: none;
