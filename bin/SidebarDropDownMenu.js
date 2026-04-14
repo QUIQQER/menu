@@ -39,33 +39,41 @@ define('package/quiqqer/menu/bin/SidebarDropDownMenu', [
          */
         $onImport: function ()
         {
-            var self         = this,
-                Parent       = this.getElm(),
-                ToggleButton = Parent.getElements(".quiqqer-fa-levels-icon");
+            const Parent = this.getElm();
+            const ToggleButtons = Parent.querySelectorAll(".quiqqer-fa-levels-icon");
+            let runs = false;
 
-            var runs = false;
+            ToggleButtons.forEach((ToggleButton) => {
+                ToggleButton.addEventListener("click", () => {
+                    if (runs) {
+                        return;
+                    }
 
-            ToggleButton.addEvent("click", function ()
-            {
-                if (runs) {
-                    return;
-                }
+                    const LiLeft = ToggleButton.closest("li");
 
-                runs = true;
+                    if (!LiLeft) {
+                        return;
+                    }
 
-                var LiLeft = this.getParent('li');
-                var NavSubLeft = LiLeft.getElement("div.quiqqer-sub-nav-div");
-                var Prom;
+                    const NavSubLeft = LiLeft.querySelector("div.quiqqer-sub-nav-div");
 
-                if (!NavSubLeft.getSize().y.toInt()) {
-                    Prom = self.openMenu(NavSubLeft);
-                } else {
-                    Prom = self.closeMenu(NavSubLeft);
-                }
+                    if (!NavSubLeft) {
+                        return;
+                    }
 
-                Prom.then(function ()
-                {
-                    runs = false;
+                    runs = true;
+
+                    let Prom;
+
+                    if (!NavSubLeft.getBoundingClientRect().height) {
+                        Prom = this.openMenu(NavSubLeft);
+                    } else {
+                        Prom = this.closeMenu(NavSubLeft);
+                    }
+
+                    Prom.then(() => {
+                        runs = false;
+                    });
                 });
             });
         },
@@ -79,43 +87,39 @@ define('package/quiqqer/menu/bin/SidebarDropDownMenu', [
          */
         openMenu: function (NavSubLeft)
         {
-            var Prev = NavSubLeft.getPrevious('.quiqqer-navigation-entry'),
-                Icon = Prev.getChildren('.quiqqer-fa-levels-icon'),
-                List = NavSubLeft.getElement("ul");
+            const Prev = NavSubLeft.previousElementSibling;
+            const Icon = Prev ? Prev.querySelector('.quiqqer-fa-levels-icon') : null;
+            const List = NavSubLeft.querySelector("ul");
 
-            if (Icon.hasClass('fa-angle-double-right')) {
-                Icon.addClass("fa-nav-levels-rotate");
+            if (Icon && Icon.classList.contains('fa-angle-double-right')) {
+                Icon.classList.add("fa-nav-levels-rotate");
             }
 
-            return new Promise(function (resolve)
-            {
+            return new Promise((resolve) => {
                 if (List) {
-                    List.setStyle("display", "flow-root");
+                    List.style.display = "flow-root";
                 }
 
-                NavSubLeft.setStyles({
-                    height  : "auto",
-                    opacity : 0,
-                    overflow: "hidden",
-                    display : "block"
-                });
+                NavSubLeft.style.height = "auto";
+                NavSubLeft.style.opacity = "0";
+                NavSubLeft.style.overflow = "hidden";
+                NavSubLeft.style.display = "block";
 
-                var targetHeight = NavSubLeft.getScrollSize().y.toInt();
+                const targetHeight = NavSubLeft.scrollHeight;
 
-                NavSubLeft.setStyle("height", 0);
+                NavSubLeft.style.height = "0";
 
                 moofx(NavSubLeft).animate({
                     height : targetHeight,
                     opacity: 1
                 }, {
                     duration: 200,
-                    callback: function ()
-                    {
-                        NavSubLeft.setStyle('height', null);
-                        NavSubLeft.setStyle('overflow', null);
+                    callback: () => {
+                        NavSubLeft.style.height = "";
+                        NavSubLeft.style.overflow = "";
 
                         if (List) {
-                            List.setStyle("display", null);
+                            List.style.display = "";
                         }
 
                         resolve();
@@ -133,15 +137,16 @@ define('package/quiqqer/menu/bin/SidebarDropDownMenu', [
          */
         closeMenu: function (NavSubLeft)
         {
-            var Prev = NavSubLeft.getPrevious('.quiqqer-navigation-entry'),
-                Icon = Prev.getChildren('.quiqqer-fa-levels-icon');
+            const Prev = NavSubLeft.previousElementSibling;
+            const Icon = Prev ? Prev.querySelector('.quiqqer-fa-levels-icon') : null;
 
-            Icon.removeClass("fa-nav-levels-rotate");
+            if (Icon) {
+                Icon.classList.remove("fa-nav-levels-rotate");
+            }
 
-            return new Promise(function (resolve)
-            {
-                NavSubLeft.setStyle("overflow", "hidden");
-                NavSubLeft.setStyle("height", NavSubLeft.getSize().y);
+            return new Promise((resolve) => {
+                NavSubLeft.style.overflow = "hidden";
+                NavSubLeft.style.height = NavSubLeft.getBoundingClientRect().height + "px";
 
                 moofx(NavSubLeft).animate({
                     height : 0,
