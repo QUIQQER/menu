@@ -90,9 +90,14 @@ define('package/quiqqer/menu/bin/SidebarDropDownMenu', [
             const Prev = NavSubLeft.previousElementSibling;
             const Icon = Prev ? Prev.querySelector('.quiqqer-fa-levels-icon') : null;
             const List = NavSubLeft.querySelector("ul");
+            const ParentLi = NavSubLeft.closest("li");
 
             if (Icon && Icon.classList.contains('fa-angle-double-right')) {
                 Icon.classList.add("fa-nav-levels-rotate");
+            }
+
+            if (ParentLi) {
+                ParentLi.classList.add("open");
             }
 
             return new Promise((resolve) => {
@@ -139,6 +144,7 @@ define('package/quiqqer/menu/bin/SidebarDropDownMenu', [
         {
             const Prev = NavSubLeft.previousElementSibling;
             const Icon = Prev ? Prev.querySelector('.quiqqer-fa-levels-icon') : null;
+            const ParentLi = NavSubLeft.closest("li");
 
             if (Icon) {
                 Icon.classList.remove("fa-nav-levels-rotate");
@@ -155,6 +161,10 @@ define('package/quiqqer/menu/bin/SidebarDropDownMenu', [
                     duration: 200,
                     callback: function ()
                     {
+                        if (ParentLi) {
+                            ParentLi.classList.remove("open");
+                        }
+
                         resolve();
                     }
                 });

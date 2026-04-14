@@ -179,33 +179,27 @@
         <locale name="menu.control.sidebarDropDownMenu.setting.levels">
             <de><![CDATA[Navigationstiefe]]></de>
             <en><![CDATA[Navigation levels]]></en>
-            <pl><![CDATA[]]></pl>
         </locale>
         <locale name="menu.control.sidebarDropDownMenu.setting.onlyFirstLevelIcons">
             <de><![CDATA[Icons nur der erste Ebene anzeigen]]></de>
             <en><![CDATA[Show icons only on first level]]></en>
-            <pl><![CDATA[]]></pl>
         </locale>
 
         <locale name="menu.control.sidebarDropDownMenu.setting.listType">
             <de><![CDATA[Listenformatierung]]></de>
             <en><![CDATA[List type]]></en>
-            <pl><![CDATA[Rodzaj listy]]></pl>
         </locale>
         <locale name="menu.control.sidebarDropDownMenu.setting.listType.fontAwesome">
-            <de><![CDATA[Font Awesome Icons]]></de>
-            <en><![CDATA[Font Awesome icons]]></en>
-            <pl><![CDATA[Ikony Font Awesome]]></pl>
+            <de><![CDATA[Standard-Liste mit Ikonen]]></de>
+            <en><![CDATA[Default list with icons]]></en>
         </locale>
         <locale name="menu.control.sidebarDropDownMenu.setting.listType.sitePicture">
             <de><![CDATA[Seiten Bilder bzw. Icons]]></de>
             <en><![CDATA[Site picture or icons]]></en>
-            <pl><![CDATA[Zdjecie lub ikona strony]]></pl>
         </locale>
         <locale name="menu.control.sidebarDropDownMenu.setting.listType.none">
             <de><![CDATA[Ohne]]></de>
             <en><![CDATA[None]]></en>
-            <pl><![CDATA[Brak]]></pl>
         </locale>
         <locale name="menu.control.sidebarDropDownMenu.setting.showAllChildren">
             <de><![CDATA[Auch Seiten anzeigen welche die Eigenschaft nicht in Navigation anzeigen besitzen.]]></de>
