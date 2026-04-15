@@ -33,6 +33,8 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
             '$resize',
             'toggle',
             '$onVisibilityChange',
+            '$onViewportIntersection',
+            '$onDestroy',
             '$mouseMoveHandler',
             '$mouseDownHandler',
             '$mouseUpHandler'
@@ -78,12 +80,16 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
             // progress / autoplay state
             this.isPaused     = false;
             this._autoPausedByVisibility = false;
+            this._autoPausedByViewport = false;
+            this._isInViewport = true;
+            this._viewportObserver = null;
             this._progressRef = null; // {bar, container, handler}
             this.SliderBtn    = null;
             this._isSwitching = false; // prevents button flickering during internal auto-switch
 
             this.addEvents({
-                onImport: this.$onImport
+                onImport: this.$onImport,
+                onDestroy: this.$onDestroy
             });
 
             QUI.addEvent('resize', this.$resize);
@@ -238,6 +244,8 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                 this.options.showprogress = String(showProgressAttr) !== '0' && String(showProgressAttr) !== 'false';
             }
 
+            this.$initViewportObserver();
+
             this.progresElms = Elm.querySelectorAll('.quiqqer-tabsAdvanced-progress');
 
             // if progress should be hidden, hide the containers visually
@@ -249,7 +257,13 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
 
             // start autoplay if enabled
             if (this.options.autoplay && this.ActiveNavTab) {
-                this.$startProgress(this.ActiveNavTab);
+                if (this.$canRunAutoplay()) {
+                    this.$startProgress(this.ActiveNavTab);
+                } else {
+                    this.isPaused = true;
+                    this._autoPausedByVisibility = document.hidden;
+                    this._autoPausedByViewport = !this._isInViewport;
+                }
             }
 
             // initialize slider control button
@@ -263,10 +277,14 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                     // if autoplay was disabled before, enable and start it via click
                     if (!self.options.autoplay) {
                         self.options.autoplay = true;
-                        self.isPaused = false;
+                        self._autoPausedByVisibility = document.hidden;
+                        self._autoPausedByViewport = !self._isInViewport;
+                        self.isPaused = !self.$canRunAutoplay();
                         self.$updateSliderButton();
                         if (self.ActiveNavTab) {
-                            self.$startProgress(self.ActiveNavTab);
+                            if (self.$canRunAutoplay()) {
+                                self.$startProgress(self.ActiveNavTab);
+                            }
                         }
                         return;
                     }
@@ -302,8 +320,98 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
 
             if (this._autoPausedByVisibility) {
                 this._autoPausedByVisibility = false;
-                this.resumeAutoplay();
+                if (!this._autoPausedByViewport) {
+                    this.resumeAutoplay();
+                }
             }
+        },
+
+        /**
+         * Clean up global listeners and observers when the control is destroyed.
+         */
+        $onDestroy: function () {
+            document.removeEventListener('visibilitychange', this.$onVisibilityChange);
+
+            if (this._viewportObserver) {
+                this._viewportObserver.disconnect();
+                this._viewportObserver = null;
+            }
+        },
+
+        /**
+         * Initialize viewport tracking for autoplay.
+         * Autoplay should only continue while the tab control is visible.
+         */
+        $initViewportObserver: function () {
+            const Elm = this.getElm();
+
+            if (!Elm) {
+                return;
+            }
+
+            this._isInViewport = this.$isInViewport(Elm);
+
+            if (typeof IntersectionObserver === 'undefined') {
+                return;
+            }
+
+            if (this._viewportObserver) {
+                this._viewportObserver.disconnect();
+            }
+
+            this._viewportObserver = new IntersectionObserver(this.$onViewportIntersection, {
+                threshold: 0.15
+            });
+
+            this._viewportObserver.observe(Elm);
+        },
+
+        /**
+         * Pause autoplay while the control is outside the viewport and resume
+         * it with the remaining duration once it becomes visible again.
+         *
+         * @param {IntersectionObserverEntry[]} entries
+         */
+        $onViewportIntersection: function (entries) {
+            if (!entries || !entries.length) {
+                return;
+            }
+
+            const Entry = entries[0];
+
+            this._isInViewport = !!(
+                Entry.isIntersecting &&
+                Entry.intersectionRatio > 0
+            );
+
+            if (!this.options.autoplay) {
+                return;
+            }
+
+            if (!this._isInViewport) {
+                if (!this.isPaused && !document.hidden) {
+                    this._autoPausedByViewport = true;
+                    this.pauseAutoplay();
+                }
+                return;
+            }
+
+            if (this._autoPausedByViewport) {
+                this._autoPausedByViewport = false;
+
+                if (!document.hidden && !this._autoPausedByVisibility) {
+                    this.resumeAutoplay();
+                }
+            }
+        },
+
+        /**
+         * Check whether autoplay is currently allowed to run.
+         *
+         * @return {boolean}
+         */
+        $canRunAutoplay: function () {
+            return !document.hidden && this._isInViewport;
         },
 
         /**
@@ -978,18 +1086,19 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
         },
 
         /**
-         * Check whether the given element is fully inside the current viewport.
+         * Check whether the given element is at least partially inside
+         * the current viewport.
          *
          * @param {HTMLElement} element - Element to check.
-         * @return {boolean} True if the element is fully visible in viewport.
+         * @return {boolean} True if the element intersects the viewport.
          */
         $isInViewport: function (element) {
             const rect = element.getBoundingClientRect();
             return (
-                rect.top >= 0 &&
-                rect.left >= 0 &&
-                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-                rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+                rect.bottom > 0 &&
+                rect.right > 0 &&
+                rect.top < (window.innerHeight || document.documentElement.clientHeight) &&
+                rect.left < (window.innerWidth || document.documentElement.clientWidth)
             );
         },
 
@@ -1258,6 +1367,14 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
          * Uses stored remaining duration or recalculates it from DOM width.
          */
         resumeAutoplay: function () {
+            if (!this.$canRunAutoplay()) {
+                this._autoPausedByVisibility = document.hidden;
+                this._autoPausedByViewport = !this._isInViewport;
+                this.isPaused = true;
+                this.$updateSliderButton();
+                return;
+            }
+
             this.isPaused = false;
             // if a progress exists, just continue and set a new timeout
             if (this._progressRef && this._progressRef.container) {
