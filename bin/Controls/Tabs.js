@@ -35,6 +35,8 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
             '$onVisibilityChange',
             '$onViewportIntersection',
             '$onDestroy',
+            '$onMouseEnter',
+            '$onMouseLeave',
             '$mouseMoveHandler',
             '$mouseDownHandler',
             '$mouseUpHandler'
@@ -50,6 +52,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
             dragThreshold     : 6,     // px, minimal movement to count as drag
             autoplay          : false, // automatically switch tabs
             autoplayinterval  : 5000,  // ms, duration until automatic switch (= progress duration)
+            pauseonhover      : false, // pause autoplay while hovering the whole control
             showprogress      : true   // show progress bar below the tabs
         },
 
@@ -81,6 +84,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
             this.isPaused     = false;
             this._autoPausedByVisibility = false;
             this._autoPausedByViewport = false;
+            this._autoPausedByHover = false;
             this._isInViewport = true;
             this._viewportObserver = null;
             this._progressRef = null; // {bar, container, handler}
@@ -239,6 +243,11 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                 this.options.autoplayinterval = intervalAttr;
             }
 
+            const pauseOnHoverAttr = this.getAttribute('pauseonhover');
+            if (pauseOnHoverAttr !== null && pauseOnHoverAttr !== false) {
+                this.options.pauseonhover = ['1', 1, true, 'true'].indexOf(pauseOnHoverAttr) !== -1;
+            }
+
             const showProgressAttr = this.getAttribute('showprogress');
             if (showProgressAttr !== null) {
                 this.options.showprogress = String(showProgressAttr) !== '0' && String(showProgressAttr) !== 'false';
@@ -255,9 +264,16 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                 });
             }
 
+            if (this.$shouldUseHoverPause()) {
+                Elm.addEventListener('mouseenter', this.$onMouseEnter);
+                Elm.addEventListener('mouseleave', this.$onMouseLeave);
+            }
+
             // start autoplay if enabled
             if (this.options.autoplay && this.ActiveNavTab) {
-                if (this.$canRunAutoplay()) {
+                this._autoPausedByHover = this.$isControlHovered();
+
+                if (this.$canRunAutoplay() && !this._autoPausedByHover) {
                     this.$startProgress(this.ActiveNavTab);
                 } else {
                     this.isPaused = true;
@@ -279,10 +295,11 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                         self.options.autoplay = true;
                         self._autoPausedByVisibility = document.hidden;
                         self._autoPausedByViewport = !self._isInViewport;
-                        self.isPaused = !self.$canRunAutoplay();
+                        self._autoPausedByHover = self.$isControlHovered();
+                        self.isPaused = !self.$canRunAutoplay() || self._autoPausedByHover;
                         self.$updateSliderButton();
                         if (self.ActiveNavTab) {
-                            if (self.$canRunAutoplay()) {
+                            if (self.$canRunAutoplay() && !self._autoPausedByHover) {
                                 self.$startProgress(self.ActiveNavTab);
                             }
                         }
@@ -320,7 +337,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
 
             if (this._autoPausedByVisibility) {
                 this._autoPausedByVisibility = false;
-                if (!this._autoPausedByViewport) {
+                if (!this._autoPausedByViewport && !this._autoPausedByHover) {
                     this.resumeAutoplay();
                 }
             }
@@ -330,7 +347,14 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
          * Clean up global listeners and observers when the control is destroyed.
          */
         $onDestroy: function () {
+            const Elm = this.getElm();
+
             document.removeEventListener('visibilitychange', this.$onVisibilityChange);
+
+            if (Elm) {
+                Elm.removeEventListener('mouseenter', this.$onMouseEnter);
+                Elm.removeEventListener('mouseleave', this.$onMouseLeave);
+            }
 
             if (this._viewportObserver) {
                 this._viewportObserver.disconnect();
@@ -399,10 +423,77 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
             if (this._autoPausedByViewport) {
                 this._autoPausedByViewport = false;
 
-                if (!document.hidden && !this._autoPausedByVisibility) {
+                if (!document.hidden && !this._autoPausedByVisibility && !this._autoPausedByHover) {
                     this.resumeAutoplay();
                 }
             }
+        },
+
+        /**
+         * Pause autoplay while the user hovers the complete control.
+         */
+        $onMouseEnter: function () {
+            if (!this.$shouldUseHoverPause()) {
+                return;
+            }
+
+            if (!this.isPaused && this.$canRunAutoplay()) {
+                this._autoPausedByHover = true;
+                this.pauseAutoplay();
+            }
+        },
+
+        /**
+         * Resume autoplay after leaving the control if the pause was
+         * triggered by hover and no other auto-pause reason is active.
+         */
+        $onMouseLeave: function () {
+            if (!this._autoPausedByHover) {
+                return;
+            }
+
+            this._autoPausedByHover = false;
+
+            if (
+                this.options.autoplay &&
+                !this._autoPausedByVisibility &&
+                !this._autoPausedByViewport &&
+                this.$canRunAutoplay()
+            ) {
+                this.resumeAutoplay();
+            }
+        },
+
+        /**
+         * Check whether hover-based autoplay pause should be active.
+         *
+         * @return {boolean}
+         */
+        $shouldUseHoverPause: function () {
+            if (!this.options.pauseonhover) {
+                return false;
+            }
+
+            if (!window.matchMedia) {
+                return true;
+            }
+
+            return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        },
+
+        /**
+         * Check whether the pointer currently hovers the control.
+         *
+         * @return {boolean}
+         */
+        $isControlHovered: function () {
+            if (!this.$shouldUseHoverPause()) {
+                return false;
+            }
+
+            const Elm = this.getElm();
+
+            return !!(Elm && Elm.matches && Elm.matches(':hover'));
         },
 
         /**

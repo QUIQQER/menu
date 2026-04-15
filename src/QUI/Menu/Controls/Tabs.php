@@ -38,6 +38,7 @@ class Tabs extends QUI\Control
             'autoPlay.controls' => false, // show play / pause button
             'autoPlay.controls.alignment' => 'right', // left / center / right
             'autoPlay.interval' => 5000,
+            'autoPlay.pauseOnHover' => false,
             'autoPlay.progress.indicator' => 'progressbar', // if empty no slider indicator will be shown
 
             // tabs nav
@@ -98,6 +99,7 @@ class Tabs extends QUI\Control
         $this->setJavaScriptControlOption('enabledragtoscroll', $this->getAttribute('enableDragToScroll'));
         $this->setJavaScriptControlOption('autoplay', $this->getAttribute('autoPlay'));
         $this->setJavaScriptControlOption('autoplayinterval', $this->getAttribute('autoPlay.interval'));
+        $this->setJavaScriptControlOption('pauseonhover', $this->getAttribute('autoPlay.pauseOnHover'));
 
         // 1) Aktiv per Query-Parameter ?open=<slug> (slug wie in id / urlEncodeString)
         if (isset($_GET['open']) && $_GET['open']) {

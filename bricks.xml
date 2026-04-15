@@ -239,6 +239,14 @@
                                 var="control.tabs.autoPlay.interval.desc"/>
                     </description>
                 </setting>
+                <setting name="autoPlay.pauseOnHover" type="checkbox">
+                    <locale group="quiqqer/menu"
+                            var="control.tabs.autoPlay.pauseOnHover"/>
+                    <description>
+                        <locale group="quiqqer/menu"
+                                var="control.tabs.autoPlay.pauseOnHover.desc"/>
+                    </description>
+                </setting>
                 <setting name="autoPlay.progress.indicator" type="select">
                     <locale group="quiqqer/menu"
                             var="control.tabs.autoPlay.progress.indicator"/>
