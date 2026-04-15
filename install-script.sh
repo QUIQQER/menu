@@ -20,7 +20,7 @@ else
   PACKAGE_NAME=$2
 fi
 
-set -Eeuox pipefail
+set -Eeuo pipefail
 
 QUIQQER_ROOT=/var/www/html
 
@@ -59,7 +59,8 @@ echo "Executing QUIQQER setup to add update server to composer.json..."
 ./console setup
 
 echo "Requiring package into QUIQQER..."
-COMPOSER_MIRROR_PATH_REPOS=1 ./console composer require --no-interaction --update-with-all-dependencies --minimal-changes "${PACKAGE_NAME}:dev-$PACKAGE_LATEST_COMMIT@dev as $PACKAGE_LATEST_VERSION"
+./console composer config minimum-stability dev 
+COMPOSER_MIRROR_PATH_REPOS=1 ./console composer require --no-interaction --update-with-all-dependencies --minimal-changes "${PACKAGE_NAME}:dev-${PACKAGE_LATEST_COMMIT}@dev as ${PACKAGE_LATEST_VERSION}"
 
 echo "Replacing required version of package with files in ${PACKAGE_FOLDER}, because 'composer require' deletes files..."
 PACKAGE_FOLDER_IN_QUIQQER=${QUIQQER_ROOT}/packages/${PACKAGE_NAME}
