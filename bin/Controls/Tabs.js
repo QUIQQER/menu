@@ -184,6 +184,10 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
             this.ActiveNavTab  = Elm.getElement('.quiqqer-tab-nav-item.active');
             this.ActiveContent = Elm.getElement('.quiqqer-tab-content-item.active');
 
+            if (this.ActiveContent && this.$wasOpenedByUrl(this.ActiveContent)) {
+                this.$prepareContentMedia(this.ActiveContent);
+            }
+
             let clickEvent = function (event) {
                 event.stop();
                 // do not trigger a tab change while currently dragging
@@ -364,11 +368,12 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                 self.disableNavItem(self.ActiveNavTab);
                 self.$setNavItemPos(NavItem);
                 TabContent.setStyle('display', null);
+                self.$prepareContentMedia(TabContent);
 
                 return Promise.all([
                     self.enableNavItem(NavItem),
                     self.showContent(TabContent),
-                    self.$setHeight(TabContent.offsetHeight)
+                    self.$setHeightForContent(TabContent)
                 ]);
             }).then(function () {
                 self.clicked = false;
@@ -532,6 +537,141 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
         $setHeight: function (height) {
             return this.$animate(this.NavContentContainer, {
                 height: height
+            });
+        },
+
+        /**
+         * Wait until the browser has applied the latest layout changes.
+         *
+         * @return {Promise<void>}
+         */
+        $waitForLayout: function () {
+            return new Promise(function (resolve) {
+                requestAnimationFrame(function () {
+                    requestAnimationFrame(resolve);
+                });
+            });
+        },
+
+        /**
+         * Measure the content height after the element became visible.
+         *
+         * @param {HTMLElement} Item
+         * @return {Promise<void>}
+         */
+        $setHeightForContent: function (Item) {
+            const self = this;
+
+            return this.$waitForLayout().then(function () {
+                return self.$setHeight(self.$getContentHeight(Item));
+            });
+        },
+
+        /**
+         * Return the best available content height.
+         *
+         * @param {HTMLElement} Item
+         * @return {number}
+         */
+        $getContentHeight: function (Item) {
+            if (!Item) {
+                return 0;
+            }
+
+            return Math.ceil(Math.max(
+                Item.offsetHeight || 0,
+                Item.scrollHeight || 0
+            ));
+        },
+
+        /**
+         * Ensure active tab images start loading immediately and update the
+         * container height once the browser has final media dimensions.
+         *
+         * @param {HTMLElement} Item
+         */
+        $prepareContentMedia: function (Item) {
+            if (!Item) {
+                return;
+            }
+
+            const self = this;
+            const Images = Item.querySelectorAll('img');
+
+            if (!Images.length) {
+                return;
+            }
+
+            Images.forEach(function (Image) {
+                if (Image.loading === 'lazy') {
+                    Image.loading = 'eager';
+                }
+
+                const syncHeight = function () {
+                    self.$syncActiveContentHeight(Item);
+                };
+
+                if (!Image.dataset.quiTabsHeightSyncBound) {
+                    Image.addEventListener('load', syncHeight);
+                    Image.addEventListener('error', syncHeight);
+                    Image.addEventListener('lazyloaded', syncHeight);
+                    Image.dataset.quiTabsHeightSyncBound = '1';
+                }
+
+                if (
+                    window.lazySizes &&
+                    window.lazySizes.loader &&
+                    typeof window.lazySizes.loader.unveil === 'function' &&
+                    Image.classList.contains('lazyload')
+                ) {
+                    window.lazySizes.loader.unveil(Image);
+                }
+            });
+        },
+
+        /**
+         * Only preload the initially active tab if it was explicitly opened
+         * via the URL query parameter.
+         *
+         * @param {HTMLElement} Item
+         * @return {boolean}
+         */
+        $wasOpenedByUrl: function (Item) {
+            if (!Item || !Item.id) {
+                return false;
+            }
+
+            try {
+                const url = new URL(window.location.href);
+                return url.searchParams.get('open') === Item.id;
+            } catch (e) {
+                return false;
+            }
+        },
+
+        /**
+         * Keep the container height in sync while the newly activated content
+         * is still resolving its final image size.
+         *
+         * @param {HTMLElement} Item
+         */
+        $syncActiveContentHeight: function (Item) {
+            if (!Item || this.ActiveContent !== Item) {
+                return;
+            }
+
+            const height = this.$getContentHeight(Item);
+
+            if (!height) {
+                return;
+            }
+
+            this.NavContentContainer.setStyle('height', height);
+
+            requestAnimationFrame(() => {
+                if (this.ActiveContent === Item) {
+                    this.NavContentContainer.setStyle('height', null);
+                }
             });
         },
 
