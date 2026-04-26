@@ -204,6 +204,10 @@
                         <locale group="quiqqer/menu"
                                 var="control.tabs.template.buttonBar.navBottom"/>
                     </option>
+                    <option value="tabular">
+                        <locale group="quiqqer/menu"
+                                var="control.tabs.template.tabular"/>
+                    </option>
                 </setting>
 
                 <setting name="autoPlay" type="checkbox">

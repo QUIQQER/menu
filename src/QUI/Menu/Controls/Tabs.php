@@ -30,7 +30,8 @@ class Tabs extends QUI\Control
             'activeEntry' => 1,
             // number
             'entries' => [],
-            'template' => 'simple.navTop', // simple.navTop, simple.navBottom, buttonBar, buttonBar.navBottom
+            // simple.navTop, simple.navBottom, buttonBar, buttonBar.navBottom, tabular
+            'template' => 'simple.navTop',
             'animation' => 'scaleToLargeScaleFromSmall',
 
             // autoplay & progress
@@ -126,6 +127,14 @@ class Tabs extends QUI\Control
 
         /* template */
         switch ($this->getAttribute('template')) {
+            case 'tabular':
+                $navPos = 'top';
+                $navFile = dirname(__FILE__) . '/Tabs.Nav.Tabular.html';
+                $navCssFile = dirname(__FILE__) . '/Tabs.Nav.Tabular.css';
+                $templateCssClass = 'quiqqer-tabsAdvanced-control--tabular';
+                $navLayout = 'tabular';
+                break;
+
             case 'buttonBar.navBottom':
                 $navPos = 'bottom';
                 $navFile = dirname(__FILE__) . '/Tabs.Nav.ButtonBar.html';

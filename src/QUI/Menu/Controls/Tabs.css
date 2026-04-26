@@ -2,10 +2,14 @@
     --_buttonBar-borderWidth: var(--qui-menu-controls-tabs-buttonBar-borderWidth, 1px);
     --_buttonBar-borderColor: var(--qui-menu-controls-tabs-buttonBar-borderColor, color-mix(in srgb, currentColor 12%, transparent));
     --_buttonBar-radius: var(--qui-menu-controls-tabs-buttonBar-radius, var(--qui-btn-border-radius, 0.5rem));
+    --_tabular-borderWidth: var(--qui-menu-controls-tabs-tabular-borderWidth, 1px);
+    --_tabular-borderColor: var(--qui-menu-controls-tabs-tabular-borderColor, color-mix(in srgb, currentColor 12%, transparent));
+    --_tabular-radius: var(--qui-menu-controls-tabs-tabular-radius, var(--qui-btn-border-radius, 0.5rem));
+    --_tabular-contentPadding: var(--qui-menu-controls-tabs-tabular-contentPadding, 2rem);
 
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 3rem;
 }
 
 .quiqqer-tabsAdvanced-nav-inner,
@@ -28,8 +32,7 @@
     flex-wrap: nowrap;
     overflow: hidden;
     position: relative;
-    /*flex-grow: 1;*/
-
+    margin: 0;
     gap: 1rem;
 }
 
@@ -132,6 +135,7 @@
 .quiqqer-tabsAdvanced-sliderControl {
     transition: var(--qui-transition);
     text-align: var(--_qui-menu-controls-tabs-controlsAlignment, left);
+    padding-block: 1rem;
 }
 
 @media screen and (hover: hover) {
@@ -191,10 +195,6 @@
 /***********/
 /* content */
 /***********/
-.quiqqer-tabsAdvanced-content {
-    margin-top: var(--qui-spacing-2xl, 3rem);
-}
-
 .quiqqer-tabsAdvanced-content-itemWrapper {
     --min-image-container-width: 200px;
     display: grid;
@@ -285,4 +285,18 @@
     .quiqqer-tabsAdvanced-content-image {
         text-align: center;
     }
+}
+
+/**
+ * Layout: tabular
+ */
+.quiqqer-tabsAdvanced-control--tabular {
+    border: var(--_tabular-borderWidth) solid var(--_tabular-borderColor);
+    border-radius: var(--_tabular-radius);
+    gap: 0;
+    overflow: hidden;
+}
+
+.quiqqer-tabsAdvanced-control--tabular .quiqqer-tabsAdvanced-content-item {
+    padding: var(--_tabular-contentPadding);
 }

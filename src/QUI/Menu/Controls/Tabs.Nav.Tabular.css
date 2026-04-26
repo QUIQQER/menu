@@ -1,0 +1,50 @@
+.quiqqer-tabsAdvanced-nav--tabular {
+    border-bottom: var(--_tabular-borderWidth) solid var(--_tabular-borderColor);
+}
+
+.quiqqer-tabsAdvanced-nav--tabular.quiqqer-tabsAdvanced-nav--center {
+    justify-content: center;
+}
+
+.quiqqer-tabsAdvanced-nav-inner--tabular {
+    gap: 0;
+    margin-bottom: calc(-1 * var(--_tabular-borderWidth));
+}
+
+.quiqqer-tabsAdvanced-nav-link--tabular {
+    color: var(--qui-colors-muted);
+    padding: 1rem 1.5rem;
+}
+
+.quiqqer-tabsAdvanced-nav-link--tabular:hover {
+    color: hsl(from var(--_qui-menu-controls-tabs-accentColor, currentColor) h s calc(l - 10));
+}
+
+.quiqqer-tabsAdvanced-nav-link--tabular:hover .quiqqer-tabsAdvanced-progress {
+
+}
+
+:where(.active) > .quiqqer-tabsAdvanced-nav-link--tabular {
+    color: var(--_qui-menu-controls-tabs-accentColor, currentColor);
+}
+
+.quiqqer-tabsAdvanced-nav-linkContent--tabular {
+    min-height: var(--_qui-menu-controls-tabs-navImgHeight, 20px);
+}
+
+.quiqqer-tabsAdvanced-progress--tabular {
+    background-color: transparent;
+    bottom: 0;
+    height: var(--_tabular-borderWidth);
+}
+
+:where(.active) .quiqqer-tabsAdvanced-progress--tabular,
+.quiqqer-tabsAdvanced-nav-link--tabular:hover .quiqqer-tabsAdvanced-progress {
+    background-color: color-mix(in srgb, var(--_qui-menu-controls-tabs-accentColor, currentColor) 30%, transparent);
+}
+
+@media screen and (max-width: 767px) {
+    .quiqqer-tabsAdvanced-nav-link--tabular {
+        padding-inline: 1rem;
+    }
+}

@@ -456,6 +456,10 @@
             <de><![CDATA[Button-Leiste - Navigation unten]]></de>
             <en><![CDATA[Button bar - Navigation on bottom]]></en>
         </locale>
+        <locale name="control.tabs.template.tabular">
+            <de><![CDATA[Tabellarisch]]></de>
+            <en><![CDATA[Tabular]]></en>
+        </locale>
 
         <locale name="control.tabs.autoPlay">
             <de><![CDATA[Automatische Wiedergabe aktivieren]]></de>
