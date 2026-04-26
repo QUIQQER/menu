@@ -1,12 +1,12 @@
-<div class="quiqqer-tabsAdvanced-nav quiqqer-tabsAdvanced-nav--simple {$navAlignment}">
-    <ul class="quiqqer-tabsAdvanced-nav-inner quiqqer-tabsAdvanced-nav-inner--simple {$navFillSpace} quiqqer-tab-nav"
+<div class="quiqqer-tabsAdvanced-nav quiqqer-tabsAdvanced-nav--tabular {$navAlignment}">
+    <ul class="quiqqer-tabsAdvanced-nav-inner quiqqer-tabsAdvanced-nav-inner--tabular {$navFillSpace} quiqqer-tab-nav"
         data-name="nav"
         role="tablist">
         {foreach from=$entries item=entry key=key}
             {if !isset($entry.tabTitle) || !$entry.tabTitle}
                 {continue}
             {/if}
-            <li class="quiqqer-tabsAdvanced-nav-item quiqqer-tabsAdvanced-nav-item--simple {$navTabStyleCss}
+            <li class="quiqqer-tabsAdvanced-nav-item quiqqer-tabsAdvanced-nav-item--tabular {$navTabStyleCss}
              quiqqer-tab-nav-item {if $key == $active - 1}active{/if}"
                 data-name="nav-item"
                 role="presentation"
@@ -15,27 +15,28 @@
             >
                 <a href="#{QUI\Utils\Security\Orthos::urlEncodeString($entry.tabTitle)}"
                    data-qui-disableTemplateScroll="1"
-                   class="quiqqer-tabsAdvanced-nav-link quiqqer-tabsAdvanced-nav-link--simple {$navTabStyleCss}" draggable="false"
+                   class="quiqqer-tabsAdvanced-nav-link quiqqer-tabsAdvanced-nav-link--tabular {$navTabStyleCss}"
+                   draggable="false"
                    data-name="nav-link"
                    role="tab"
                    id="{$instanceId}-tab-{$key}"
                    aria-controls="{QUI\Utils\Security\Orthos::urlEncodeString($entry.tabTitle)}"
                    aria-selected="{if $key == $active - 1}true{else}false{/if}"
                    tabindex="{if $key == $active - 1}0{else}-1{/if}">
-                    <span class="quiqqer-tabsAdvanced-nav-linkContent quiqqer-tabsAdvanced-nav-linkContent--simple {$navTabStyleCss}">
+                    <span class="quiqqer-tabsAdvanced-nav-linkContent quiqqer-tabsAdvanced-nav-linkContent--tabular {$navTabStyleCss}">
                         {if isset($entry.tabIcon) && $entry.tabIcon}
                             {image src=$entry.tabIcon width="80" height="80"}
                         {/if}
 
                         {if $showNavText}
-                            <span class="quiqqer-tabsAdvanced-nav-linkLabel quiqqer-tabsAdvanced-nav-linkLabel--simple {$navTabStyleCss} {$navWrapText}"
+                            <span class="quiqqer-tabsAdvanced-nav-linkLabel quiqqer-tabsAdvanced-nav-linkLabel--tabular {$navTabStyleCss} {$navWrapText}"
                                   data-name="nav-label">
                                 {$entry.tabTitle}
                             </span>
                         {/if}
                     </span>
 
-                    <span class="quiqqer-tabsAdvanced-progress quiqqer-tabsAdvanced-progress--simple"
+                    <span class="quiqqer-tabsAdvanced-progress quiqqer-tabsAdvanced-progress--tabular"
                           data-name="progress">
                         <span class="quiqqer-tabsAdvanced-progress__bar" data-name="progress-bar"></span>
                     </span>
