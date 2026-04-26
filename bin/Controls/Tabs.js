@@ -111,10 +111,10 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                 this.setAttribute('animation', Elm.getAttribute('data-qui-options-animation'));
             }
 
-            this.navTab              = Elm.getElement('.quiqqer-tab-nav');
-            this.navTabsItems        = Elm.getElements('.quiqqer-tab-nav-item');
-            this.navContents         = Elm.getElements('.quiqqer-tab-content-item');
-            this.NavContentContainer = Elm.getElement('.quiqqer-tab-content');
+            this.navTab              = Elm.getElement('[data-name="nav"]');
+            this.navTabsItems        = Elm.getElements('[data-name="nav-item"]');
+            this.navContents         = Elm.getElements('[data-name="content-item"]');
+            this.NavContentContainer = Elm.getElement('[data-name="content"]');
 
             if (!this.navTabsItems || !this.navContents) {
                 return;
@@ -191,8 +191,8 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                 }
             }
 
-            this.ActiveNavTab  = Elm.getElement('.quiqqer-tab-nav-item.active');
-            this.ActiveContent = Elm.getElement('.quiqqer-tab-content-item.active');
+            this.ActiveNavTab  = Elm.getElement('[data-name="nav-item"].active');
+            this.ActiveContent = Elm.getElement('[data-name="content-item"].active');
 
             if (this.ActiveContent && this.$wasOpenedByUrl(this.ActiveContent)) {
                 this.$prepareContentMedia(this.ActiveContent);
@@ -212,11 +212,17 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
 
                 let NavTabItem = event.target;
 
-                if (NavTabItem.nodeName !== 'LI') {
-                    NavTabItem = NavTabItem.getParent('li');
+                if (!NavTabItem || NavTabItem.getAttribute('data-name') !== 'nav-item') {
+                    NavTabItem = NavTabItem.getParent('[data-name="nav-item"]');
                 }
 
-                let targetHref = NavTabItem.getElement('a').getAttribute('href');
+                if (!NavTabItem) {
+                    self.clicked = false;
+                    return;
+                }
+
+                let NavLink = NavTabItem.getElement('[data-name="nav-link"]');
+                let targetHref = NavLink ? NavLink.getAttribute('href') : '';
                 let target = targetHref ? targetHref.replace(/^#/, '') : '';
 
                 if (!target) {
@@ -255,7 +261,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
 
             this.$initViewportObserver();
 
-            this.progresElms = Elm.querySelectorAll('.quiqqer-tabsAdvanced-progress');
+            this.progresElms = Elm.querySelectorAll('[data-name="progress"]');
 
             // if progress should be hidden, hide the containers visually
             if (!this.options.showprogress) {
@@ -608,7 +614,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                     }
 
                     // live region message
-                    const Live = self.getElm().getElement('#tabs-live');
+                    const Live = self.getElm().getElement('[data-name="live-region"]');
                     if (Live) {
                         const items = self.navTabsItems;
                         let index = -1;
@@ -616,7 +622,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                             if (items[i] === NavItem) { index = i; break; }
                         }
                         const total = items ? items.length : 0;
-                        const label = NavItem ? NavItem.getElement('.quiqqer-tabsAdvanced-nav-linkLabel') : null;
+                        const label = NavItem ? NavItem.getElement('[data-name="nav-label"]') : null;
                         const text  = 'Slide ' + (index + 1) + ' von ' + total + (label ? ': ' + label.get('text') : '');
                         Live.set('text', text);
                     }
@@ -1337,8 +1343,8 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
 
             this.$stopProgress();
 
-            const Progress = NavItem.getElement('.quiqqer-tabsAdvanced-progress');
-            const Bar      = Progress ? Progress.getElement('.quiqqer-tabsAdvanced-progress__bar') : null;
+            const Progress = NavItem.getElement('[data-name="progress"]');
+            const Bar      = Progress ? Progress.getElement('[data-name="progress-bar"]') : null;
 
             if (!Progress || !Bar) {
                 return;
@@ -1411,11 +1417,11 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
             }
 
             // reset all progress indicators
-            this.getElm().getElements('.quiqqer-tabsAdvanced-progress').forEach(function (P) {
+            this.getElm().getElements('[data-name="progress"]').forEach(function (P) {
                 P.removeClass('quiqqer-tabsAdvanced-progress--active');
                 P.style.removeProperty('--progress-duration');
                 P.style.removeProperty('--progress-state');
-                var Bar = P.getElement('.quiqqer-tabsAdvanced-progress__bar');
+                var Bar = P.getElement('[data-name="progress-bar"]');
                 if (Bar) {
                     Bar.style.width = '0%';
                 }

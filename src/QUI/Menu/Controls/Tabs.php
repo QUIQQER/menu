@@ -30,7 +30,7 @@ class Tabs extends QUI\Control
             'activeEntry' => 1,
             // number
             'entries' => [],
-            'template' => 'simple1', // simple1, simple2
+            'template' => 'simple.navTop', // simple.navTop, simple.navBottom, buttonBar, buttonBar.navBottom
             'animation' => 'scaleToLargeScaleFromSmall',
 
             // autoplay & progress
@@ -78,6 +78,10 @@ class Tabs extends QUI\Control
         $Engine = QUI::getTemplateManager()->getEngine();
         $entries = $this->getAttribute('entries');
         $enabledEntries = [];
+        $navFile = null;
+        $navCssFile = null;
+        $templateCssClass = null;
+        $navLayout = null;
 
         // Eindeutige ID pro Widget-Instanz (für ARIA-IDs, Live-Region etc.)
         $instanceId = 'tabs-' . uniqid('', true);
@@ -122,15 +126,41 @@ class Tabs extends QUI\Control
 
         /* template */
         switch ($this->getAttribute('template')) {
+            case 'buttonBar.navBottom':
+                $navPos = 'bottom';
+                $navFile = dirname(__FILE__) . '/Tabs.Nav.ButtonBar.html';
+                $navCssFile = dirname(__FILE__) . '/Tabs.Nav.ButtonBar.css';
+                $templateCssClass = 'quiqqer-tabsAdvanced-control--buttonBar';
+                $navLayout = 'buttonBar';
+                break;
+
+            case 'buttonBar':
+                $navPos = 'top';
+                $navFile = dirname(__FILE__) . '/Tabs.Nav.ButtonBar.html';
+                $navCssFile = dirname(__FILE__) . '/Tabs.Nav.ButtonBar.css';
+                $templateCssClass = 'quiqqer-tabsAdvanced-control--buttonBar';
+                $navLayout = 'buttonBar';
+                break;
+
             case 'simple.navBottom':
                 $navPos = 'bottom';
+                $navFile = dirname(__FILE__) . '/Tabs.Nav.Simple.html';
+                $navCssFile = dirname(__FILE__) . '/Tabs.Nav.Simple.css';
+                $templateCssClass = 'quiqqer-tabsAdvanced-control--simple';
+                $navLayout = 'simple';
                 break;
 
             case 'simple.navTop':
             default:
                 $navPos = 'top';
+                $navFile = dirname(__FILE__) . '/Tabs.Nav.Simple.html';
+                $navCssFile = dirname(__FILE__) . '/Tabs.Nav.Simple.css';
+                $templateCssClass = 'quiqqer-tabsAdvanced-control--simple';
+                $navLayout = 'simple';
                 break;
         }
+
+        $this->addCSSFile($navCssFile);
 
         /* nav */
         $showNavText = true;
@@ -223,12 +253,15 @@ class Tabs extends QUI\Control
             'instanceId' => $instanceId,
             'navStyle' => $this->getAttribute('navStyle'),
             'navPos' => $navPos,
-            'navFile' => dirname(__FILE__) . '/Tabs.Nav.Simple.html',
+            'navFile' => $navFile,
             'navWrapText' => $navWrapText,
             'navTabStyleCss' => $navTabStyleCss,
             'showNavText' => $showNavText,
             'navAlignment' => $navAlignment,
             'navFillSpace' => $navFillSpace,
+            'templateCssClass' => $templateCssClass,
+            'navLayout' => $navLayout,
+            'navFillSpaceEnabled' => (bool)$this->getAttribute('navFillSpace'),
             'contentImgMaxWidth' => $contentImgMaxWidth,
             'autoPlay' => $this->getAttribute('autoPlay')
         ]);

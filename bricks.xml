@@ -196,6 +196,14 @@
                         <locale group="quiqqer/menu"
                                 var="control.tabs.template.simple.navBottom"/>
                     </option>
+                    <option value="buttonBar">
+                        <locale group="quiqqer/menu"
+                                var="control.tabs.template.buttonBar"/>
+                    </option>
+                    <option value="buttonBar.navBottom">
+                        <locale group="quiqqer/menu"
+                                var="control.tabs.template.buttonBar.navBottom"/>
+                    </option>
                 </setting>
 
                 <setting name="autoPlay" type="checkbox">
