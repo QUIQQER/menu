@@ -690,6 +690,10 @@
             <de><![CDATA[Tab Einträge]]></de>
             <en><![CDATA[Tab entries]]></en>
         </locale>
+        <locale name="control.tabs.category.tabs">
+            <de><![CDATA[Tab Einträge]]></de>
+            <en><![CDATA[Tab entries]]></en>
+        </locale>
         <locale name="frontend.control.tabs.slider.btn.label.play.initial">
             <de><![CDATA[Automatische Wiedergabe starten]]></de>
             <en><![CDATA[Start autoplay]]></en>

@@ -439,11 +439,31 @@
                     </description>
                 </setting>
 
-                <setting name="entries" type="hidden" data-qui="package/quiqqer/menu/bin/Controls/Tabs.Settings">
-                    <locale group="quiqqer/menu" var="control.tabs.entries"/>
-                </setting>
-
             </settings>
+
+            <window>
+                <categories>
+                    <category name="tabs" index="35">
+                        <text>
+                            <locale group="quiqqer/menu" var="control.tabs.category.tabs"/>
+                        </text>
+                        <image>fa fa-list-alt</image>
+
+                        <settings name="tabs">
+                            <title>
+                                <locale group="quiqqer/menu" var="control.tabs.entries"/>
+                            </title>
+
+                            <input conf="entries" type="hidden" label="false"
+                                   data-qui="package/quiqqer/menu/bin/Controls/Tabs.Settings">
+                                <text>
+                                    <locale group="quiqqer/menu" var="control.tabs.entries"/>
+                                </text>
+                            </input>
+                        </settings>
+                    </category>
+                </categories>
+            </window>
         </brick>
 
         <!-- nav tabs vertical -->

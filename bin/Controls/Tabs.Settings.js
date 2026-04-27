@@ -45,6 +45,8 @@ define('package/quiqqer/menu/bin/Controls/Tabs.Settings', [
             '$openDeleteDialog',
             '$openEditDialog',
             '$toggleSlideStatus',
+            '$onDestroy',
+            'resize',
             'update'
         ],
 
@@ -53,11 +55,13 @@ define('package/quiqqer/menu/bin/Controls/Tabs.Settings', [
 
             this.$Input = null;
             this.$Grid  = null;
+            this.$Desktop = null;
 
             this.$data = [];
 
             this.addEvents({
-                onImport: this.$onImport
+                onImport : this.$onImport,
+                onDestroy: this.$onDestroy
             });
         },
 
@@ -72,25 +76,32 @@ define('package/quiqqer/menu/bin/Controls/Tabs.Settings', [
                 styles : {
                     clear   : 'both',
                     'float' : 'left',
-                    height  : 400,
+                    height  : '100%',
+                    minHeight: 400,
                     overflow: 'hidden',
                     position: 'relative',
-                    margin  : '10px 0 0 0',
+                    margin  : 0,
                     width   : '100%'
                 }
             }).wraps(this.$Input);
 
             // grid and sizes
-            var size = this.$Elm.getSize();
+            var size = this.$getAvailableSize();
 
-            var Desktop = new Element('div', {
+            this.$Elm.setStyles({
+                height: size.y,
+                width : size.x
+            });
+
+            this.$Desktop = new Element('div', {
                 styles: {
+                    height: size.y,
                     width: size.x
                 }
             }).inject(this.$Elm);
 
-            this.$Grid = new Grid(Desktop, {
-                height     : 400,
+            this.$Grid = new Grid(this.$Desktop, {
+                height     : size.y,
                 width      : size.x,
                 buttons    : [
                     {
@@ -247,6 +258,15 @@ define('package/quiqqer/menu/bin/Controls/Tabs.Settings', [
                 this.refresh();
             } catch (e) {
             }
+
+            QUI.addEvent('resize', this.resize);
+        },
+
+        /**
+         * event: on destroy
+         */
+        $onDestroy: function () {
+            QUI.removeEvent('resize', this.resize);
         },
 
         /**
@@ -272,11 +292,64 @@ define('package/quiqqer/menu/bin/Controls/Tabs.Settings', [
          * @return {Promise}
          */
         resize: function () {
-            var size = this.getElm().getSize();
+            if (!this.$Grid || !this.$Elm || !this.$Desktop) {
+                return Promise.resolve();
+            }
+
+            var size = this.$getAvailableSize();
+
+            this.$Elm.setStyles({
+                height: size.y,
+                width : size.x
+            });
+
+            this.$Desktop.setStyles({
+                height: size.y,
+                width : size.x
+            });
+
+            this.$Grid.setHeight(size.y);
 
             return this.$Grid.setWidth(size.x).then(function () {
                 this.$Grid.resize();
             }.bind(this));
+        },
+
+        /**
+         * Return the available size for the settings grid.
+         *
+         * @return {Object}
+         */
+        $getAvailableSize: function () {
+            var Container = this.$Elm.getParent('.quiqqer-bricks-container'),
+                Parent    = this.$Elm.getParent(),
+                width     = 0,
+                height    = 0;
+
+            if (Container) {
+                var containerSize = Container.getSize(),
+                    top           = this.$Elm.getPosition(Container).y;
+
+                width  = containerSize.x;
+                height = containerSize.y - top;
+            }
+
+            if (!width && Parent) {
+                width = Parent.getSize().x;
+            }
+
+            if (!height && Parent) {
+                height = Parent.getSize().y;
+            }
+
+            if (!width) {
+                width = this.$Elm.getSize().x;
+            }
+
+            return {
+                x: Math.max(width, 400),
+                y: Math.max(height, 400)
+            };
         },
 
         /**
