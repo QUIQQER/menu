@@ -66,6 +66,7 @@ class Tabs extends QUI\Control
 
         parent::__construct($attributes);
 
+        $this->setAttribute('cacheable', 0);
         $this->addCSSFile(dirname(__FILE__) . '/Tabs.css');
     }
 
@@ -99,7 +100,7 @@ class Tabs extends QUI\Control
             $enabledEntries[] = $entry;
         }
 
-        $active = 1;
+        $active = null;
 
         $this->setJavaScriptControlOption('enabledragtoscroll', $this->getAttribute('enableDragToScroll'));
         $this->setJavaScriptControlOption('autoplay', $this->getAttribute('autoPlay'));
@@ -121,8 +122,12 @@ class Tabs extends QUI\Control
         }
 
         // 2) Fallback: activeEntry-Attribut (1-basiert)
-        if ($active === 1 && $this->getAttribute('activeEntry') && $this->getAttribute('activeEntry') > 0) {
+        if ($active === null && $this->getAttribute('activeEntry') && $this->getAttribute('activeEntry') > 0) {
             $active = (int)$this->getAttribute('activeEntry');
+        }
+
+        if ($active === null) {
+            $active = 1;
         }
 
         /* template */
