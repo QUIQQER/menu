@@ -1,0 +1,37 @@
+.quiqqer-tabsAdvanced-nav-inner--buttonBar {
+    gap: 0.75rem;
+    padding: 0.5rem;
+    border: 1px solid var(--_buttonBar-borderColor);
+    border-radius: var(--_buttonBar-radius);
+}
+
+.quiqqer-tabsAdvanced-nav-item--buttonBar {
+    flex: 0 0 auto;
+}
+
+.btn.quiqqer-tabsAdvanced-nav-link--buttonBar {
+    --qui-btn-color: inherit;
+    --qui-btn-bgColor: transparent;
+    --qui-btn-borderColor: transparent;
+    --qui-btn-color--hover: var(--_qui-menu-controls-tabs-accentColor, currentColor);
+    --qui-btn-bgColor--hover: color-mix(in srgb, var(--_qui-menu-controls-tabs-accentColor, currentColor) 12%, transparent);
+    --qui-btn-borderColor--hover: transparent;
+
+    border-radius: var(--_buttonBar-radius);
+}
+
+.quiqqer-tabsAdvanced-nav-item--buttonBar.active > .btn {
+    --qui-btn-color: var(--_qui-menu-controls-tabs-accentColor, currentColor);
+    --qui-btn-bgColor: color-mix(in srgb, currentColor 12%, transparent);
+    --qui-btn-borderColor: transparent;
+    --qui-btn-color--hover: var(--_qui-menu-controls-tabs-accentColor, var(--qui-colors-primary));
+    --qui-btn-bgColor--hover: color-mix(in srgb, currentColor 20%, transparent);
+    --qui-btn-borderColor--hover: transparent;
+}
+
+.quiqqer-tabsAdvanced-progress--buttonBar {
+    left: 1rem;
+    right: 1rem;
+    bottom: 0.3rem;
+    background-color: transparent;
+}

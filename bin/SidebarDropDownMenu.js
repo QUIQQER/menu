@@ -39,33 +39,41 @@ define('package/quiqqer/menu/bin/SidebarDropDownMenu', [
          */
         $onImport: function ()
         {
-            var self         = this,
-                Parent       = this.getElm(),
-                ToggleButton = Parent.getElements(".quiqqer-fa-levels-icon");
+            const Parent = this.getElm();
+            const ToggleButtons = Parent.querySelectorAll('[data-name="menu-toggle"]');
+            let runs = false;
 
-            var runs = false;
+            ToggleButtons.forEach((ToggleButton) => {
+                ToggleButton.addEventListener("click", () => {
+                    if (runs) {
+                        return;
+                    }
 
-            ToggleButton.addEvent("click", function ()
-            {
-                if (runs) {
-                    return;
-                }
+                    const LiLeft = ToggleButton.closest('[data-name="menu-item"]');
 
-                runs = true;
+                    if (!LiLeft) {
+                        return;
+                    }
 
-                var LiLeft = this.getParent('li');
-                var NavSubLeft = LiLeft.getElement("div.quiqqer-sub-nav-div");
-                var Prom;
+                    const NavSubLeft = LiLeft.querySelector('[data-name="submenu"]');
 
-                if (!NavSubLeft.getSize().y.toInt()) {
-                    Prom = self.openMenu(NavSubLeft);
-                } else {
-                    Prom = self.closeMenu(NavSubLeft);
-                }
+                    if (!NavSubLeft) {
+                        return;
+                    }
 
-                Prom.then(function ()
-                {
-                    runs = false;
+                    runs = true;
+
+                    let Prom;
+
+                    if (!NavSubLeft.getBoundingClientRect().height) {
+                        Prom = this.openMenu(NavSubLeft);
+                    } else {
+                        Prom = this.closeMenu(NavSubLeft);
+                    }
+
+                    Prom.then(() => {
+                        runs = false;
+                    });
                 });
             });
         },
@@ -79,29 +87,44 @@ define('package/quiqqer/menu/bin/SidebarDropDownMenu', [
          */
         openMenu: function (NavSubLeft)
         {
-            return new Promise(function (resolve)
-            {
-                NavSubLeft.setStyles({
-                    height  : 0,
-                    opacity : 0,
-                    overflow: "hidden",
-                    display : "block"
-                });
+            const Prev = NavSubLeft.previousElementSibling;
+            const Icon = Prev ? Prev.querySelector('[data-name="menu-toggle"]') : null;
+            const List = NavSubLeft.querySelector('[data-name="menu-list"]');
+            const ParentLi = NavSubLeft.closest('[data-name="menu-item"]');
+
+            if (Icon && Icon.classList.contains('fa-angle-double-right')) {
+                Icon.classList.add("fa-nav-levels-rotate");
+            }
+
+            if (ParentLi) {
+                ParentLi.classList.add("open");
+            }
+
+            return new Promise((resolve) => {
+                if (List) {
+                    List.style.display = "flow-root";
+                }
+
+                NavSubLeft.style.height = "auto";
+                NavSubLeft.style.opacity = "0";
+                NavSubLeft.style.overflow = "hidden";
+                NavSubLeft.style.display = "block";
+
+                const targetHeight = NavSubLeft.scrollHeight;
+
+                NavSubLeft.style.height = "0";
 
                 moofx(NavSubLeft).animate({
-                    height : NavSubLeft.getElement("ul").getSize().y.toInt(),
+                    height : targetHeight,
                     opacity: 1
                 }, {
                     duration: 200,
-                    callback: function ()
-                    {
-                        NavSubLeft.setStyle('height', '100%');
+                    callback: () => {
+                        NavSubLeft.style.height = "";
+                        NavSubLeft.style.overflow = "";
 
-                        var Prev = NavSubLeft.getPrevious('.quiqqer-navigation-entry'),
-                            Icon = Prev.getChildren('.quiqqer-fa-levels-icon');
-
-                        if (Icon.hasClass('fa-angle-double-right')) {
-                            Icon.addClass("fa-nav-levels-rotate");
+                        if (List) {
+                            List.style.display = "";
                         }
 
                         resolve();
@@ -119,10 +142,17 @@ define('package/quiqqer/menu/bin/SidebarDropDownMenu', [
          */
         closeMenu: function (NavSubLeft)
         {
-            return new Promise(function (resolve)
-            {
-                NavSubLeft.setStyle("overflow", "hidden");
-                NavSubLeft.setStyle("height", NavSubLeft.getSize().y);
+            const Prev = NavSubLeft.previousElementSibling;
+            const Icon = Prev ? Prev.querySelector('[data-name="menu-toggle"]') : null;
+            const ParentLi = NavSubLeft.closest('[data-name="menu-item"]');
+
+            if (Icon) {
+                Icon.classList.remove("fa-nav-levels-rotate");
+            }
+
+            return new Promise((resolve) => {
+                NavSubLeft.style.overflow = "hidden";
+                NavSubLeft.style.height = NavSubLeft.getBoundingClientRect().height + "px";
 
                 moofx(NavSubLeft).animate({
                     height : 0,
@@ -131,10 +161,10 @@ define('package/quiqqer/menu/bin/SidebarDropDownMenu', [
                     duration: 200,
                     callback: function ()
                     {
-                        var Prev = NavSubLeft.getPrevious('.quiqqer-navigation-entry'),
-                            Icon = Prev.getChildren('.quiqqer-fa-levels-icon');
+                        if (ParentLi) {
+                            ParentLi.classList.remove("open");
+                        }
 
-                        Icon.removeClass("fa-nav-levels-rotate");
                         resolve();
                     }
                 });

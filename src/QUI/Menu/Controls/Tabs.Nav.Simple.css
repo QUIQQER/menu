@@ -1,0 +1,16 @@
+.quiqqer-tabsAdvanced-nav-link--simple {
+    padding: 1rem;
+    color: var(--qui-colors-muted);
+}
+
+.quiqqer-tabsAdvanced-nav-link--simple:hover {
+    color: hsl(from var(--_qui-menu-controls-tabs-accentColor, currentColor) h s calc(l - 10));
+}
+
+:where(.active) > .quiqqer-tabsAdvanced-nav-link--simple {
+    color: var(--_qui-menu-controls-tabs-accentColor, currentColor);
+}
+
+.quiqqer-tabsAdvanced-nav--simple.quiqqer-tabsAdvanced-nav--center {
+    justify-content: center;
+}

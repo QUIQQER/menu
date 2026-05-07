@@ -60,11 +60,19 @@
                 <setting name="onlyFirstLevelIcons" type="checkbox">
                     <locale group="quiqqer/menu"
                             var="menu.control.sidebarDropDownMenu.setting.onlyFirstLevelIcons"/>
+                    <description>
+                        <locale group="quiqqer/menu"
+                                var="menu.control.sidebarDropDownMenu.setting.onlyFirstLevelIcons.desc"/>
+                    </description>
                 </setting>
 
                 <setting name="listType" type="select">
                     <locale group="quiqqer/menu"
                             var="menu.control.sidebarDropDownMenu.setting.listType"/>
+                    <description>
+                        <locale group="quiqqer/menu"
+                                var="menu.control.sidebarDropDownMenu.setting.listType.desc"/>
+                    </description>
 
                     <option value="fontAwesome">
                         <locale group="quiqqer/menu"
@@ -188,6 +196,18 @@
                         <locale group="quiqqer/menu"
                                 var="control.tabs.template.simple.navBottom"/>
                     </option>
+                    <option value="buttonBar">
+                        <locale group="quiqqer/menu"
+                                var="control.tabs.template.buttonBar"/>
+                    </option>
+                    <option value="buttonBar.navBottom">
+                        <locale group="quiqqer/menu"
+                                var="control.tabs.template.buttonBar.navBottom"/>
+                    </option>
+                    <option value="tabular">
+                        <locale group="quiqqer/menu"
+                                var="control.tabs.template.tabular"/>
+                    </option>
                 </setting>
 
                 <setting name="autoPlay" type="checkbox">
@@ -229,6 +249,14 @@
                     <description>
                         <locale group="quiqqer/menu"
                                 var="control.tabs.autoPlay.interval.desc"/>
+                    </description>
+                </setting>
+                <setting name="autoPlay.pauseOnHover" type="checkbox">
+                    <locale group="quiqqer/menu"
+                            var="control.tabs.autoPlay.pauseOnHover"/>
+                    <description>
+                        <locale group="quiqqer/menu"
+                                var="control.tabs.autoPlay.pauseOnHover.desc"/>
                     </description>
                 </setting>
                 <setting name="autoPlay.progress.indicator" type="select">

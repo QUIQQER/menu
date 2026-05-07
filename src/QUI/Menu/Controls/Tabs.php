@@ -30,7 +30,8 @@ class Tabs extends QUI\Control
             'activeEntry' => 1,
             // number
             'entries' => [],
-            'template' => 'simple1', // simple1, simple2
+            // simple.navTop, simple.navBottom, buttonBar, buttonBar.navBottom, tabular
+            'template' => 'simple.navTop',
             'animation' => 'scaleToLargeScaleFromSmall',
 
             // autoplay & progress
@@ -38,6 +39,7 @@ class Tabs extends QUI\Control
             'autoPlay.controls' => false, // show play / pause button
             'autoPlay.controls.alignment' => 'right', // left / center / right
             'autoPlay.interval' => 5000,
+            'autoPlay.pauseOnHover' => false,
             'autoPlay.progress.indicator' => 'progressbar', // if empty no slider indicator will be shown
 
             // tabs nav
@@ -77,6 +79,10 @@ class Tabs extends QUI\Control
         $Engine = QUI::getTemplateManager()->getEngine();
         $entries = $this->getAttribute('entries');
         $enabledEntries = [];
+        $navFile = null;
+        $navCssFile = null;
+        $templateCssClass = null;
+        $navLayout = null;
 
         // Eindeutige ID pro Widget-Instanz (für ARIA-IDs, Live-Region etc.)
         $instanceId = 'tabs-' . uniqid('', true);
@@ -98,6 +104,7 @@ class Tabs extends QUI\Control
         $this->setJavaScriptControlOption('enabledragtoscroll', $this->getAttribute('enableDragToScroll'));
         $this->setJavaScriptControlOption('autoplay', $this->getAttribute('autoPlay'));
         $this->setJavaScriptControlOption('autoplayinterval', $this->getAttribute('autoPlay.interval'));
+        $this->setJavaScriptControlOption('pauseonhover', $this->getAttribute('autoPlay.pauseOnHover'));
 
         // 1) Aktiv per Query-Parameter ?open=<slug> (slug wie in id / urlEncodeString)
         if (isset($_GET['open']) && $_GET['open']) {
@@ -120,15 +127,49 @@ class Tabs extends QUI\Control
 
         /* template */
         switch ($this->getAttribute('template')) {
+            case 'tabular':
+                $navPos = 'top';
+                $navFile = dirname(__FILE__) . '/Tabs.Nav.Tabular.html';
+                $navCssFile = dirname(__FILE__) . '/Tabs.Nav.Tabular.css';
+                $templateCssClass = 'quiqqer-tabsAdvanced-control--tabular';
+                $navLayout = 'tabular';
+                break;
+
+            case 'buttonBar.navBottom':
+                $navPos = 'bottom';
+                $navFile = dirname(__FILE__) . '/Tabs.Nav.ButtonBar.html';
+                $navCssFile = dirname(__FILE__) . '/Tabs.Nav.ButtonBar.css';
+                $templateCssClass = 'quiqqer-tabsAdvanced-control--buttonBar';
+                $navLayout = 'buttonBar';
+                break;
+
+            case 'buttonBar':
+                $navPos = 'top';
+                $navFile = dirname(__FILE__) . '/Tabs.Nav.ButtonBar.html';
+                $navCssFile = dirname(__FILE__) . '/Tabs.Nav.ButtonBar.css';
+                $templateCssClass = 'quiqqer-tabsAdvanced-control--buttonBar';
+                $navLayout = 'buttonBar';
+                break;
+
             case 'simple.navBottom':
                 $navPos = 'bottom';
+                $navFile = dirname(__FILE__) . '/Tabs.Nav.Simple.html';
+                $navCssFile = dirname(__FILE__) . '/Tabs.Nav.Simple.css';
+                $templateCssClass = 'quiqqer-tabsAdvanced-control--simple';
+                $navLayout = 'simple';
                 break;
 
             case 'simple.navTop':
             default:
                 $navPos = 'top';
+                $navFile = dirname(__FILE__) . '/Tabs.Nav.Simple.html';
+                $navCssFile = dirname(__FILE__) . '/Tabs.Nav.Simple.css';
+                $templateCssClass = 'quiqqer-tabsAdvanced-control--simple';
+                $navLayout = 'simple';
                 break;
         }
+
+        $this->addCSSFile($navCssFile);
 
         /* nav */
         $showNavText = true;
@@ -221,12 +262,15 @@ class Tabs extends QUI\Control
             'instanceId' => $instanceId,
             'navStyle' => $this->getAttribute('navStyle'),
             'navPos' => $navPos,
-            'navFile' => dirname(__FILE__) . '/Tabs.Nav.Simple.html',
+            'navFile' => $navFile,
             'navWrapText' => $navWrapText,
             'navTabStyleCss' => $navTabStyleCss,
             'showNavText' => $showNavText,
             'navAlignment' => $navAlignment,
             'navFillSpace' => $navFillSpace,
+            'templateCssClass' => $templateCssClass,
+            'navLayout' => $navLayout,
+            'navFillSpaceEnabled' => (bool)$this->getAttribute('navFillSpace'),
             'contentImgMaxWidth' => $contentImgMaxWidth,
             'autoPlay' => $this->getAttribute('autoPlay')
         ]);

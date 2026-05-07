@@ -33,6 +33,10 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
             '$resize',
             'toggle',
             '$onVisibilityChange',
+            '$onViewportIntersection',
+            '$onDestroy',
+            '$onMouseEnter',
+            '$onMouseLeave',
             '$mouseMoveHandler',
             '$mouseDownHandler',
             '$mouseUpHandler'
@@ -48,6 +52,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
             dragThreshold     : 6,     // px, minimal movement to count as drag
             autoplay          : false, // automatically switch tabs
             autoplayinterval  : 5000,  // ms, duration until automatic switch (= progress duration)
+            pauseonhover      : false, // pause autoplay while hovering the whole control
             showprogress      : true   // show progress bar below the tabs
         },
 
@@ -78,12 +83,17 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
             // progress / autoplay state
             this.isPaused     = false;
             this._autoPausedByVisibility = false;
+            this._autoPausedByViewport = false;
+            this._autoPausedByHover = false;
+            this._isInViewport = true;
+            this._viewportObserver = null;
             this._progressRef = null; // {bar, container, handler}
             this.SliderBtn    = null;
             this._isSwitching = false; // prevents button flickering during internal auto-switch
 
             this.addEvents({
-                onImport: this.$onImport
+                onImport: this.$onImport,
+                onDestroy: this.$onDestroy
             });
 
             QUI.addEvent('resize', this.$resize);
@@ -101,10 +111,10 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                 this.setAttribute('animation', Elm.getAttribute('data-qui-options-animation'));
             }
 
-            this.navTab              = Elm.getElement('.quiqqer-tab-nav');
-            this.navTabsItems        = Elm.getElements('.quiqqer-tab-nav-item');
-            this.navContents         = Elm.getElements('.quiqqer-tab-content-item');
-            this.NavContentContainer = Elm.getElement('.quiqqer-tab-content');
+            this.navTab              = Elm.getElement('[data-name="nav"]');
+            this.navTabsItems        = Elm.getElements('[data-name="nav-item"]');
+            this.navContents         = Elm.getElements('[data-name="content-item"]');
+            this.NavContentContainer = Elm.getElement('[data-name="content"]');
 
             if (!this.navTabsItems || !this.navContents) {
                 return;
@@ -181,8 +191,12 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                 }
             }
 
-            this.ActiveNavTab  = Elm.getElement('.quiqqer-tab-nav-item.active');
-            this.ActiveContent = Elm.getElement('.quiqqer-tab-content-item.active');
+            this.ActiveNavTab  = Elm.getElement('[data-name="nav-item"].active');
+            this.ActiveContent = Elm.getElement('[data-name="content-item"].active');
+
+            if (this.ActiveContent && this.$wasOpenedByUrl(this.ActiveContent)) {
+                this.$prepareContentMedia(this.ActiveContent);
+            }
 
             let clickEvent = function (event) {
                 event.stop();
@@ -198,11 +212,17 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
 
                 let NavTabItem = event.target;
 
-                if (NavTabItem.nodeName !== 'LI') {
-                    NavTabItem = NavTabItem.getParent('li');
+                if (!NavTabItem || NavTabItem.getAttribute('data-name') !== 'nav-item') {
+                    NavTabItem = NavTabItem.getParent('[data-name="nav-item"]');
                 }
 
-                let targetHref = NavTabItem.getElement('a').getAttribute('href');
+                if (!NavTabItem) {
+                    self.clicked = false;
+                    return;
+                }
+
+                let NavLink = NavTabItem.getElement('[data-name="nav-link"]');
+                let targetHref = NavLink ? NavLink.getAttribute('href') : '';
                 let target = targetHref ? targetHref.replace(/^#/, '') : '';
 
                 if (!target) {
@@ -229,12 +249,19 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                 this.options.autoplayinterval = intervalAttr;
             }
 
+            const pauseOnHoverAttr = this.getAttribute('pauseonhover');
+            if (pauseOnHoverAttr !== null && pauseOnHoverAttr !== false) {
+                this.options.pauseonhover = ['1', 1, true, 'true'].indexOf(pauseOnHoverAttr) !== -1;
+            }
+
             const showProgressAttr = this.getAttribute('showprogress');
             if (showProgressAttr !== null) {
                 this.options.showprogress = String(showProgressAttr) !== '0' && String(showProgressAttr) !== 'false';
             }
 
-            this.progresElms = Elm.querySelectorAll('.quiqqer-tabsAdvanced-progress');
+            this.$initViewportObserver();
+
+            this.progresElms = Elm.querySelectorAll('[data-name="progress"]');
 
             // if progress should be hidden, hide the containers visually
             if (!this.options.showprogress) {
@@ -243,9 +270,22 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                 });
             }
 
+            if (this.$shouldUseHoverPause()) {
+                Elm.addEventListener('mouseenter', this.$onMouseEnter);
+                Elm.addEventListener('mouseleave', this.$onMouseLeave);
+            }
+
             // start autoplay if enabled
             if (this.options.autoplay && this.ActiveNavTab) {
-                this.$startProgress(this.ActiveNavTab);
+                this._autoPausedByHover = this.$isControlHovered();
+
+                if (this.$canRunAutoplay() && !this._autoPausedByHover) {
+                    this.$startProgress(this.ActiveNavTab);
+                } else {
+                    this.isPaused = true;
+                    this._autoPausedByVisibility = document.hidden;
+                    this._autoPausedByViewport = !this._isInViewport;
+                }
             }
 
             // initialize slider control button
@@ -259,10 +299,15 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                     // if autoplay was disabled before, enable and start it via click
                     if (!self.options.autoplay) {
                         self.options.autoplay = true;
-                        self.isPaused = false;
+                        self._autoPausedByVisibility = document.hidden;
+                        self._autoPausedByViewport = !self._isInViewport;
+                        self._autoPausedByHover = self.$isControlHovered();
+                        self.isPaused = !self.$canRunAutoplay() || self._autoPausedByHover;
                         self.$updateSliderButton();
                         if (self.ActiveNavTab) {
-                            self.$startProgress(self.ActiveNavTab);
+                            if (self.$canRunAutoplay() && !self._autoPausedByHover) {
+                                self.$startProgress(self.ActiveNavTab);
+                            }
                         }
                         return;
                     }
@@ -298,8 +343,172 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
 
             if (this._autoPausedByVisibility) {
                 this._autoPausedByVisibility = false;
+                if (!this._autoPausedByViewport && !this._autoPausedByHover) {
+                    this.resumeAutoplay();
+                }
+            }
+        },
+
+        /**
+         * Clean up global listeners and observers when the control is destroyed.
+         */
+        $onDestroy: function () {
+            const Elm = this.getElm();
+
+            document.removeEventListener('visibilitychange', this.$onVisibilityChange);
+
+            if (Elm) {
+                Elm.removeEventListener('mouseenter', this.$onMouseEnter);
+                Elm.removeEventListener('mouseleave', this.$onMouseLeave);
+            }
+
+            if (this._viewportObserver) {
+                this._viewportObserver.disconnect();
+                this._viewportObserver = null;
+            }
+        },
+
+        /**
+         * Initialize viewport tracking for autoplay.
+         * Autoplay should only continue while the tab control is visible.
+         */
+        $initViewportObserver: function () {
+            const Elm = this.getElm();
+
+            if (!Elm) {
+                return;
+            }
+
+            this._isInViewport = this.$isInViewport(Elm);
+
+            if (typeof IntersectionObserver === 'undefined') {
+                return;
+            }
+
+            if (this._viewportObserver) {
+                this._viewportObserver.disconnect();
+            }
+
+            this._viewportObserver = new IntersectionObserver(this.$onViewportIntersection, {
+                threshold: 0.15
+            });
+
+            this._viewportObserver.observe(Elm);
+        },
+
+        /**
+         * Pause autoplay while the control is outside the viewport and resume
+         * it with the remaining duration once it becomes visible again.
+         *
+         * @param {IntersectionObserverEntry[]} entries
+         */
+        $onViewportIntersection: function (entries) {
+            if (!entries || !entries.length) {
+                return;
+            }
+
+            const Entry = entries[0];
+
+            this._isInViewport = !!(
+                Entry.isIntersecting &&
+                Entry.intersectionRatio > 0
+            );
+
+            if (!this.options.autoplay) {
+                return;
+            }
+
+            if (!this._isInViewport) {
+                if (!this.isPaused && !document.hidden) {
+                    this._autoPausedByViewport = true;
+                    this.pauseAutoplay();
+                }
+                return;
+            }
+
+            if (this._autoPausedByViewport) {
+                this._autoPausedByViewport = false;
+
+                if (!document.hidden && !this._autoPausedByVisibility && !this._autoPausedByHover) {
+                    this.resumeAutoplay();
+                }
+            }
+        },
+
+        /**
+         * Pause autoplay while the user hovers the complete control.
+         */
+        $onMouseEnter: function () {
+            if (!this.$shouldUseHoverPause()) {
+                return;
+            }
+
+            if (!this.isPaused && this.$canRunAutoplay()) {
+                this._autoPausedByHover = true;
+                this.pauseAutoplay();
+            }
+        },
+
+        /**
+         * Resume autoplay after leaving the control if the pause was
+         * triggered by hover and no other auto-pause reason is active.
+         */
+        $onMouseLeave: function () {
+            if (!this._autoPausedByHover) {
+                return;
+            }
+
+            this._autoPausedByHover = false;
+
+            if (
+                this.options.autoplay &&
+                !this._autoPausedByVisibility &&
+                !this._autoPausedByViewport &&
+                this.$canRunAutoplay()
+            ) {
                 this.resumeAutoplay();
             }
+        },
+
+        /**
+         * Check whether hover-based autoplay pause should be active.
+         *
+         * @return {boolean}
+         */
+        $shouldUseHoverPause: function () {
+            if (!this.options.pauseonhover) {
+                return false;
+            }
+
+            if (!window.matchMedia) {
+                return true;
+            }
+
+            return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        },
+
+        /**
+         * Check whether the pointer currently hovers the control.
+         *
+         * @return {boolean}
+         */
+        $isControlHovered: function () {
+            if (!this.$shouldUseHoverPause()) {
+                return false;
+            }
+
+            const Elm = this.getElm();
+
+            return !!(Elm && Elm.matches && Elm.matches(':hover'));
+        },
+
+        /**
+         * Check whether autoplay is currently allowed to run.
+         *
+         * @return {boolean}
+         */
+        $canRunAutoplay: function () {
+            return !document.hidden && this._isInViewport;
         },
 
         /**
@@ -364,11 +573,12 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                 self.disableNavItem(self.ActiveNavTab);
                 self.$setNavItemPos(NavItem);
                 TabContent.setStyle('display', null);
+                self.$prepareContentMedia(TabContent);
 
                 return Promise.all([
                     self.enableNavItem(NavItem),
                     self.showContent(TabContent),
-                    self.$setHeight(TabContent.offsetHeight)
+                    self.$setHeightForContent(TabContent)
                 ]);
             }).then(function () {
                 self.clicked = false;
@@ -404,7 +614,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                     }
 
                     // live region message
-                    const Live = self.getElm().getElement('#tabs-live');
+                    const Live = self.getElm().getElement('[data-name="live-region"]');
                     if (Live) {
                         const items = self.navTabsItems;
                         let index = -1;
@@ -412,7 +622,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                             if (items[i] === NavItem) { index = i; break; }
                         }
                         const total = items ? items.length : 0;
-                        const label = NavItem ? NavItem.getElement('.quiqqer-tabsAdvanced-nav-linkLabel') : null;
+                        const label = NavItem ? NavItem.getElement('[data-name="nav-label"]') : null;
                         const text  = 'Slide ' + (index + 1) + ' von ' + total + (label ? ': ' + label.get('text') : '');
                         Live.set('text', text);
                     }
@@ -532,6 +742,141 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
         $setHeight: function (height) {
             return this.$animate(this.NavContentContainer, {
                 height: height
+            });
+        },
+
+        /**
+         * Wait until the browser has applied the latest layout changes.
+         *
+         * @return {Promise<void>}
+         */
+        $waitForLayout: function () {
+            return new Promise(function (resolve) {
+                requestAnimationFrame(function () {
+                    requestAnimationFrame(resolve);
+                });
+            });
+        },
+
+        /**
+         * Measure the content height after the element became visible.
+         *
+         * @param {HTMLElement} Item
+         * @return {Promise<void>}
+         */
+        $setHeightForContent: function (Item) {
+            const self = this;
+
+            return this.$waitForLayout().then(function () {
+                return self.$setHeight(self.$getContentHeight(Item));
+            });
+        },
+
+        /**
+         * Return the best available content height.
+         *
+         * @param {HTMLElement} Item
+         * @return {number}
+         */
+        $getContentHeight: function (Item) {
+            if (!Item) {
+                return 0;
+            }
+
+            return Math.ceil(Math.max(
+                Item.offsetHeight || 0,
+                Item.scrollHeight || 0
+            ));
+        },
+
+        /**
+         * Ensure active tab images start loading immediately and update the
+         * container height once the browser has final media dimensions.
+         *
+         * @param {HTMLElement} Item
+         */
+        $prepareContentMedia: function (Item) {
+            if (!Item) {
+                return;
+            }
+
+            const self = this;
+            const Images = Item.querySelectorAll('img');
+
+            if (!Images.length) {
+                return;
+            }
+
+            Images.forEach(function (Image) {
+                if (Image.loading === 'lazy') {
+                    Image.loading = 'eager';
+                }
+
+                const syncHeight = function () {
+                    self.$syncActiveContentHeight(Item);
+                };
+
+                if (!Image.dataset.quiTabsHeightSyncBound) {
+                    Image.addEventListener('load', syncHeight);
+                    Image.addEventListener('error', syncHeight);
+                    Image.addEventListener('lazyloaded', syncHeight);
+                    Image.dataset.quiTabsHeightSyncBound = '1';
+                }
+
+                if (
+                    window.lazySizes &&
+                    window.lazySizes.loader &&
+                    typeof window.lazySizes.loader.unveil === 'function' &&
+                    Image.classList.contains('lazyload')
+                ) {
+                    window.lazySizes.loader.unveil(Image);
+                }
+            });
+        },
+
+        /**
+         * Only preload the initially active tab if it was explicitly opened
+         * via the URL query parameter.
+         *
+         * @param {HTMLElement} Item
+         * @return {boolean}
+         */
+        $wasOpenedByUrl: function (Item) {
+            if (!Item || !Item.id) {
+                return false;
+            }
+
+            try {
+                const url = new URL(window.location.href);
+                return url.searchParams.get('open') === Item.id;
+            } catch (e) {
+                return false;
+            }
+        },
+
+        /**
+         * Keep the container height in sync while the newly activated content
+         * is still resolving its final image size.
+         *
+         * @param {HTMLElement} Item
+         */
+        $syncActiveContentHeight: function (Item) {
+            if (!Item || this.ActiveContent !== Item) {
+                return;
+            }
+
+            const height = this.$getContentHeight(Item);
+
+            if (!height) {
+                return;
+            }
+
+            this.NavContentContainer.setStyle('height', height);
+
+            requestAnimationFrame(() => {
+                if (this.ActiveContent === Item) {
+                    this.NavContentContainer.setStyle('height', null);
+                }
             });
         },
 
@@ -838,18 +1183,19 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
         },
 
         /**
-         * Check whether the given element is fully inside the current viewport.
+         * Check whether the given element is at least partially inside
+         * the current viewport.
          *
          * @param {HTMLElement} element - Element to check.
-         * @return {boolean} True if the element is fully visible in viewport.
+         * @return {boolean} True if the element intersects the viewport.
          */
         $isInViewport: function (element) {
             const rect = element.getBoundingClientRect();
             return (
-                rect.top >= 0 &&
-                rect.left >= 0 &&
-                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-                rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+                rect.bottom > 0 &&
+                rect.right > 0 &&
+                rect.top < (window.innerHeight || document.documentElement.clientHeight) &&
+                rect.left < (window.innerWidth || document.documentElement.clientWidth)
             );
         },
 
@@ -997,8 +1343,8 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
 
             this.$stopProgress();
 
-            const Progress = NavItem.getElement('.quiqqer-tabsAdvanced-progress');
-            const Bar      = Progress ? Progress.getElement('.quiqqer-tabsAdvanced-progress__bar') : null;
+            const Progress = NavItem.getElement('[data-name="progress"]');
+            const Bar      = Progress ? Progress.getElement('[data-name="progress-bar"]') : null;
 
             if (!Progress || !Bar) {
                 return;
@@ -1071,11 +1417,11 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
             }
 
             // reset all progress indicators
-            this.getElm().getElements('.quiqqer-tabsAdvanced-progress').forEach(function (P) {
+            this.getElm().getElements('[data-name="progress"]').forEach(function (P) {
                 P.removeClass('quiqqer-tabsAdvanced-progress--active');
                 P.style.removeProperty('--progress-duration');
                 P.style.removeProperty('--progress-state');
-                var Bar = P.getElement('.quiqqer-tabsAdvanced-progress__bar');
+                var Bar = P.getElement('[data-name="progress-bar"]');
                 if (Bar) {
                     Bar.style.width = '0%';
                 }
@@ -1118,6 +1464,14 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
          * Uses stored remaining duration or recalculates it from DOM width.
          */
         resumeAutoplay: function () {
+            if (!this.$canRunAutoplay()) {
+                this._autoPausedByVisibility = document.hidden;
+                this._autoPausedByViewport = !this._isInViewport;
+                this.isPaused = true;
+                this.$updateSliderButton();
+                return;
+            }
+
             this.isPaused = false;
             // if a progress exists, just continue and set a new timeout
             if (this._progressRef && this._progressRef.container) {
