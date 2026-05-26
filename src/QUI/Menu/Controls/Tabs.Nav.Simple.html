@@ -24,7 +24,7 @@
                    tabindex="{if $key == $active - 1}0{else}-1{/if}">
                     <span class="quiqqer-tabsAdvanced-nav-linkContent quiqqer-tabsAdvanced-nav-linkContent--simple {$navTabStyleCss}">
                         {if isset($entry.tabIcon) && $entry.tabIcon}
-                            {image src=$entry.tabIcon width="80" height="80"}
+                            {image src=$entry.tabIcon height="$navImgHeight"}
                         {/if}
 
                         {if $showNavText}

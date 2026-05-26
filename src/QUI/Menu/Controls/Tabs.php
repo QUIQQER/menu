@@ -182,11 +182,13 @@ class Tabs extends QUI\Control
         $navTabStyleCss = 'navTabStyle__imgLeft';
         $navAlignment = '';
         $navFillSpace = '';
-        $navImgHeight = $this->getAttribute('navImgHeight');
+        $navImgHeight = (int)$this->getAttribute('navImgHeight');
 
-        if ($navImgHeight) {
-            $this->setCustomVariable('navImgHeight', $navImgHeight);
+        if ($navImgHeight <= 0) {
+            $navImgHeight = 20;
         }
+
+        $this->setCustomVariable('navImgHeight', $navImgHeight . 'px');
 
         switch ($this->getAttribute('navStyle')) {
             case 'imgTop':
@@ -277,7 +279,8 @@ class Tabs extends QUI\Control
             'navLayout' => $navLayout,
             'navFillSpaceEnabled' => (bool)$this->getAttribute('navFillSpace'),
             'contentImgMaxWidth' => $contentImgMaxWidth,
-            'autoPlay' => $this->getAttribute('autoPlay')
+            'autoPlay' => $this->getAttribute('autoPlay'),
+            'navImgHeight' => $navImgHeight,
         ]);
 
         return $Engine->fetch(dirname(__FILE__) . '/Tabs.html');

@@ -85,7 +85,6 @@
     height: var(--_qui-menu-controls-tabs-navImgHeight, 20px);
     vertical-align: middle;
     display: block;
-    width: auto;
     margin-left: auto;
     margin-right: auto;
 }
@@ -257,8 +256,6 @@
 }
 
 .quiqqer-tabsAdvanced-content-image img {
-    width: auto;
-    height: auto;
     display: block;
 }
 
