@@ -480,12 +480,12 @@
             <en><![CDATA[Time in milliseconds before automatically switching to the next tab.]]></en>
         </locale>
         <locale name="control.tabs.autoPlay.pauseOnHover">
-            <de><![CDATA[Bei Mauskontakt pausieren]]></de>
+            <de><![CDATA[Autoplay bei Hover anhalten]]></de>
             <en><![CDATA[Pause on hover]]></en>
         </locale>
         <locale name="control.tabs.autoPlay.pauseOnHover.desc">
-            <de><![CDATA[Pausiert die automatische Wiedergabe, solange sich der Mauszeiger über dem gesamten Tab-Control befindet. Diese Option gilt nur, wenn die automatische Wiedergabe aktiv ist.]]></de>
-            <en><![CDATA[Pauses autoplay while the mouse pointer is over the entire tabs control. This option only applies when autoplay is enabled.]]></en>
+            <de><![CDATA[Hält den automatischen Wechsel nur vorübergehend an, solange sich der Mauszeiger über dem gesamten Tab-Control befindet. Die Autoplay-Einstellung selbst bleibt aktiv und läuft nach dem Verlassen weiter.]]></de>
+            <en><![CDATA[Temporarily pauses autoplay while the mouse pointer is over the entire tabs control. The autoplay setting itself remains active and continues after leaving the control.]]></en>
         </locale>
 
         <!-- Control: Tabs: progress indicator -->

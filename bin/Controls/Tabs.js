@@ -82,6 +82,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
 
             // progress / autoplay state
             this.isPaused     = false;
+            this._userPausedAutoplay = false;
             this._autoPausedByVisibility = false;
             this._autoPausedByViewport = false;
             this._autoPausedByHover = false;
@@ -320,7 +321,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
 
             if (this._autoPausedByVisibility) {
                 this._autoPausedByVisibility = false;
-                if (!this._autoPausedByViewport && !this._autoPausedByHover) {
+                if (this.$shouldAutoResumeAutoplay()) {
                     this.resumeAutoplay();
                 }
             }
@@ -406,7 +407,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
             if (this._autoPausedByViewport) {
                 this._autoPausedByViewport = false;
 
-                if (!document.hidden && !this._autoPausedByVisibility && !this._autoPausedByHover) {
+                if (this.$shouldAutoResumeAutoplay()) {
                     this.resumeAutoplay();
                 }
             }
@@ -438,10 +439,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
             this._autoPausedByHover = false;
 
             if (
-                this.options.autoplay &&
-                !this._autoPausedByVisibility &&
-                !this._autoPausedByViewport &&
-                this.$canRunAutoplay()
+                this.$shouldAutoResumeAutoplay()
             ) {
                 this.resumeAutoplay();
             }
@@ -486,6 +484,21 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
          */
         $canRunAutoplay: function () {
             return !document.hidden && this._isInViewport;
+        },
+
+        /**
+         * Check whether autoplay may automatically resume after a temporary pause.
+         *
+         * @return {boolean}
+         */
+        $shouldAutoResumeAutoplay: function () {
+            return this.options.autoplay &&
+                !this._userPausedAutoplay &&
+                !document.hidden &&
+                !this._autoPausedByVisibility &&
+                !this._autoPausedByViewport &&
+                !this._autoPausedByHover &&
+                this.$canRunAutoplay();
         },
 
         /**
@@ -1546,11 +1559,13 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                 return;
             }
 
-            const action = this.isPaused ? 'play' : 'pause';
+            const action = this._userPausedAutoplay ? 'play' : 'pause';
 
-            if (this.isPaused) {
+            if (this._userPausedAutoplay) {
+                this._userPausedAutoplay = false;
                 this.resumeAutoplay();
             } else {
+                this._userPausedAutoplay = true;
                 this.pauseAutoplay();
             }
 
@@ -1560,7 +1575,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
         },
 
         $getAutoplayActionLabel: function () {
-            if (this.isPaused || !this._progressRef) {
+            if (this._userPausedAutoplay) {
                 return QUILocale.get(lg, 'frontend.control.tabs.slider.btn.label.play');
             }
 
@@ -1620,7 +1635,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                 NavLink.setAttribute('aria-label', description);
 
                 if (Feedback) {
-                    Feedback.addClass(self.isPaused || !self._progressRef ? 'is-play' : 'is-pause');
+                    Feedback.addClass(self._userPausedAutoplay ? 'is-play' : 'is-pause');
                 }
             });
         },
