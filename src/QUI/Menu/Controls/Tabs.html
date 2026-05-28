@@ -87,18 +87,4 @@
         {include file="`$navFile`"}
     {/if}
 
-    {if $this->getAttribute('autoPlay.controls')}
-        <div class="quiqqer-tabsAdvanced-sliderControl">
-            <button class="quiqqer-tabsAdvanced-sliderControl__btn btn btn-secondary btn-secondary-outline btn-outline btn-sm {if $autoPlay}is-playing{else}is-paused{/if}"
-                    data-name="btnToggle"
-                    aria-label="{if $autoPlay}{locale group="quiqqer/menu" var="frontend.control.tabs.slider.btn.label.pause"}{else}{locale group="quiqqer/menu" var="frontend.control.tabs.slider.btn.label.play"}{/if}"
-            >
-                <span class="quiqqer-tabsAdvanced-sliderControl__btn-label" data-name="btnToggle-text">
-                    {if $autoPlay}{locale group="quiqqer/menu" var="frontend.control.tabs.slider.btn.label.pause"}{else}{locale group="quiqqer/menu" var="frontend.control.tabs.slider.btn.label.play.initial"}{/if}
-                </span>
-                <i class="fa-solid fa-play icon" aria-hidden="true"></i>
-                <i class="fa-solid fa-stop icon" aria-hidden="true"></i>
-            </button>
-        </div>
-    {/if}
 </div>

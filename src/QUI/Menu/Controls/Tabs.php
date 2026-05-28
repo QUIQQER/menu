@@ -36,8 +36,6 @@ class Tabs extends QUI\Control
 
             // autoplay & progress
             'autoPlay' => false, // enable / disable autoplay function
-            'autoPlay.controls' => false, // show play / pause button
-            'autoPlay.controls.alignment' => 'right', // left / center / right
             'autoPlay.interval' => 5000,
             'autoPlay.pauseOnHover' => false,
             'autoPlay.progress.indicator' => 'progressbar', // if empty no slider indicator will be shown
@@ -237,13 +235,6 @@ class Tabs extends QUI\Control
         if ($contentTextWidth) {
             $this->setCustomVariable('contentTextWidth', $contentTextWidth . 'px');
         }
-
-        $controlsAlignments = match ($this->getAttribute('autoPlay.controls.alignment')) {
-            'left', 'center', 'right' => $this->getAttribute('autoPlay.controls.alignment'),
-            default => 'left'
-        };
-
-        $this->setCustomVariable('controlsAlignment', $controlsAlignments);
 
         $animation = match ($this->getAttribute('animation')) {
             'fadeOutFadeIn',
