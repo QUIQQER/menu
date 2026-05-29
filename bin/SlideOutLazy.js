@@ -48,7 +48,7 @@ define('package/quiqqer/menu/bin/SlideOutLazy', [
                         this.fireEvent('open');
                     });
 
-                    Control.import(this.getElm());
+                    Control.imports(this.getElm());
 
                     if (this.$menuButtonDisabled && typeof Control.disableMenuButton === 'function') {
                         Control.disableMenuButton();
