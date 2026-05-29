@@ -48,7 +48,8 @@ class SlideOutAdvanced extends QUI\Control
         $params = [
             'this' => $this,
             'Project' => $this->getProject(),
-            'jsControl' => 'package/quiqqer/menu/bin/SlideoutAdvanced',
+            'jsControl' => 'package/quiqqer/menu/bin/SlideOutLazy',
+            'slideOutControl' => 'package/quiqqer/menu/bin/SlideoutAdvanced',
             'showShortDesc' => $this->getAttribute('showShortDesc'),
             'showHomeLink' => $this->getAttribute('showHomeLink')
         ];

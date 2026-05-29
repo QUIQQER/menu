@@ -82,13 +82,13 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
 
             // progress / autoplay state
             this.isPaused     = false;
+            this._userPausedAutoplay = false;
             this._autoPausedByVisibility = false;
             this._autoPausedByViewport = false;
             this._autoPausedByHover = false;
             this._isInViewport = true;
             this._viewportObserver = null;
             this._progressRef = null; // {bar, container, handler}
-            this.SliderBtn    = null;
             this._isSwitching = false; // prevents button flickering during internal auto-switch
 
             this.addEvents({
@@ -221,6 +221,15 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                     return;
                 }
 
+                if (NavTabItem.classList.contains('active')) {
+                    if (self.options.autoplay) {
+                        self.$toggleAutoplayFromActiveTab();
+                    }
+
+                    self.clicked = false;
+                    return;
+                }
+
                 let NavLink = NavTabItem.getElement('[data-name="nav-link"]');
                 let targetHref = NavLink ? NavLink.getAttribute('href') : '';
                 let target = targetHref ? targetHref.replace(/^#/, '') : '';
@@ -288,38 +297,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                 }
             }
 
-            // initialize slider control button
-            this.SliderBtn = Elm.querySelector('[data-name="btnToggle"]');
-            if (this.SliderBtn) {
-                this.$updateSliderButton();
-
-                this.SliderBtn.addEvent('click', function (e) {
-                    e.stop();
-
-                    // if autoplay was disabled before, enable and start it via click
-                    if (!self.options.autoplay) {
-                        self.options.autoplay = true;
-                        self._autoPausedByVisibility = document.hidden;
-                        self._autoPausedByViewport = !self._isInViewport;
-                        self._autoPausedByHover = self.$isControlHovered();
-                        self.isPaused = !self.$canRunAutoplay() || self._autoPausedByHover;
-                        self.$updateSliderButton();
-                        if (self.ActiveNavTab) {
-                            if (self.$canRunAutoplay() && !self._autoPausedByHover) {
-                                self.$startProgress(self.ActiveNavTab);
-                            }
-                        }
-                        return;
-                    }
-
-                    // toggle pause / resume
-                    if (self.isPaused) {
-                        self.resumeAutoplay();
-                    } else {
-                        self.pauseAutoplay();
-                    }
-                });
-            }
+            this.$updateActiveNavAutoplayState();
 
             // Autoplay uses a CSS animation + JS timeout as a fallback. When the browser tab is in the background,
             // animations/timers can get throttled and the content-switch animation can hang. If that happens while
@@ -343,7 +321,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
 
             if (this._autoPausedByVisibility) {
                 this._autoPausedByVisibility = false;
-                if (!this._autoPausedByViewport && !this._autoPausedByHover) {
+                if (this.$shouldAutoResumeAutoplay()) {
                     this.resumeAutoplay();
                 }
             }
@@ -429,7 +407,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
             if (this._autoPausedByViewport) {
                 this._autoPausedByViewport = false;
 
-                if (!document.hidden && !this._autoPausedByVisibility && !this._autoPausedByHover) {
+                if (this.$shouldAutoResumeAutoplay()) {
                     this.resumeAutoplay();
                 }
             }
@@ -461,10 +439,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
             this._autoPausedByHover = false;
 
             if (
-                this.options.autoplay &&
-                !this._autoPausedByVisibility &&
-                !this._autoPausedByViewport &&
-                this.$canRunAutoplay()
+                this.$shouldAutoResumeAutoplay()
             ) {
                 this.resumeAutoplay();
             }
@@ -512,6 +487,21 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
         },
 
         /**
+         * Check whether autoplay may automatically resume after a temporary pause.
+         *
+         * @return {boolean}
+         */
+        $shouldAutoResumeAutoplay: function () {
+            return this.options.autoplay &&
+                !this._userPausedAutoplay &&
+                !document.hidden &&
+                !this._autoPausedByVisibility &&
+                !this._autoPausedByViewport &&
+                !this._autoPausedByHover &&
+                this.$canRunAutoplay();
+        },
+
+        /**
          * Resize handler used to enable/disable drag-to-scroll behavior
          * based on the current width of the nav container.
          */
@@ -548,6 +538,8 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
             }
 
             var self = this;
+            const previousNavTab = this.ActiveNavTab;
+            const previousContent = this.ActiveContent;
 
             // prevent race conditions: stop existing progress immediately
             // (e.g. when user clicks manually while the old bar is about to finish)
@@ -588,11 +580,12 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
 
                 // Ensure a consistent final state: only the newly active content stays visible.
                 self.$normalizePanels();
+                self.$updateActiveNavAutoplayState();
 
                 // update ARIA status
                 try {
                     // tabs: aria-selected / tabindex
-                    const oldTab = self.ActiveNavTab ? self.ActiveNavTab.getElement('[role="tab"]') : null;
+                    const oldTab = previousNavTab ? previousNavTab.getElement('[role="tab"]') : null;
                     const newTab = NavItem ? NavItem.getElement('[role="tab"]') : null;
                     if (oldTab) {
                         oldTab.setAttribute('aria-selected', 'false');
@@ -604,7 +597,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                     }
 
                     // panels: aria-hidden
-                    const oldPanel = self.ActiveContent;
+                    const oldPanel = previousContent;
                     const newPanel = TabContent;
                     if (oldPanel) {
                         oldPanel.setAttribute('aria-hidden', 'true');
@@ -1399,7 +1392,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                 remainingMs: duration
             };
 
-            this.$updateSliderButton();
+            this.$updateActiveNavAutoplayState();
         },
 
         /**
@@ -1428,7 +1421,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
             });
             this._progressRef = null;
             if (!this._isSwitching) {
-                this.$updateSliderButton();
+                this.$updateActiveNavAutoplayState();
             }
         },
 
@@ -1456,7 +1449,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                 const remaining = Math.max(0, this._progressRef.duration * (1 - frac));
                 this._progressRef.remainingMs = remaining;
             }
-            this.$updateSliderButton();
+            this.$updateActiveNavAutoplayState();
         },
 
         /**
@@ -1468,7 +1461,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                 this._autoPausedByVisibility = document.hidden;
                 this._autoPausedByViewport = !this._isInViewport;
                 this.isPaused = true;
-                this.$updateSliderButton();
+                this.$updateActiveNavAutoplayState();
                 return;
             }
 
@@ -1502,7 +1495,7 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
                 // no progress present -> start fresh
                 this.$startProgress(this.ActiveNavTab);
             }
-            this.$updateSliderButton();
+            this.$updateActiveNavAutoplayState();
         },
 
         /**
@@ -1561,60 +1554,129 @@ define('package/quiqqer/menu/bin/Controls/Tabs', [
             } catch (e) {}
         },
 
-        /**
-         * updates icon states on the slider button
-         */
-        $updateSliderButton: function () {
-            if (!this.SliderBtn) {
+        $toggleAutoplayFromActiveTab: function () {
+            if (!this.options.autoplay || !this.ActiveNavTab) {
                 return;
             }
 
-            if (!this.options.autoplay) {
-                return;
-            }
+            const action = this._userPausedAutoplay ? 'play' : 'pause';
 
-            const BtnText = this.SliderBtn.querySelector('[data-name="btnToggle-text"]');
-
-            if (this.isPaused) {
-                this.SliderBtn.removeClass('is-playing');
-                this.SliderBtn.addClass('is-paused');
-                this.SliderBtn.setAttribute('aria-pressed', 'false');
-                this.SliderBtn.setAttribute(
-                    'aria-label',
-                    QUILocale.get(lg, 'frontend.control.tabs.slider.btn.label.play')
-                );
-
-                if (BtnText) {
-                    BtnText.textContent = QUILocale.get(lg, 'frontend.control.tabs.slider.btn.label.play');
-                }
+            if (this._userPausedAutoplay) {
+                this._userPausedAutoplay = false;
+                this.resumeAutoplay();
             } else {
-                // is progressbar active?
-                if (this._progressRef) {
-                    this.SliderBtn.removeClass('is-paused');
-                    this.SliderBtn.addClass('is-playing');
-                    this.SliderBtn.setAttribute('aria-pressed', 'true');
-                    this.SliderBtn.setAttribute(
-                        'aria-label',
-                        QUILocale.get(lg, 'frontend.control.tabs.slider.btn.label.pause')
-                    );
-
-                    if (BtnText) {
-                        BtnText.textContent = QUILocale.get(lg, 'frontend.control.tabs.slider.btn.label.pause');
-                    }
-                } else {
-                    this.SliderBtn.removeClass('is-playing');
-                    this.SliderBtn.addClass('is-paused');
-                    this.SliderBtn.setAttribute('aria-pressed', 'false');
-                    this.SliderBtn.setAttribute(
-                        'aria-label',
-                        QUILocale.get(lg, 'frontend.control.tabs.slider.btn.label.play')
-                    );
-
-                    if (BtnText) {
-                        BtnText.textContent = QUILocale.get(lg, 'frontend.control.tabs.slider.btn.label.play');
-                    }
-                }
+                this._userPausedAutoplay = true;
+                this.pauseAutoplay();
             }
+
+            this.$updateActiveNavAutoplayState();
+            this.$showAutoplayFeedback(this.ActiveNavTab);
+            this.$announceAutoplayState(action);
+        },
+
+        $getAutoplayActionLabel: function () {
+            if (this._userPausedAutoplay) {
+                return QUILocale.get(lg, 'frontend.control.tabs.slider.btn.label.play');
+            }
+
+            return QUILocale.get(lg, 'frontend.control.tabs.slider.btn.label.pause');
+        },
+
+        $getNavItemLabel: function (NavItem) {
+            if (!NavItem) {
+                return '';
+            }
+
+            const Label = NavItem.getElement('[data-name="nav-label"]');
+
+            if (Label) {
+                return Label.get('text').trim();
+            }
+
+            const Link = NavItem.getElement('[data-name="nav-link"]');
+
+            return Link ? (Link.get('text') || '').trim() : '';
+        },
+
+        $updateActiveNavAutoplayState: function () {
+            if (!this.navTabsItems || !this.navTabsItems.length) {
+                return;
+            }
+
+            const self = this;
+
+            this.navTabsItems.forEach(function (NavItem) {
+                const NavLink = NavItem.getElement('[data-name="nav-link"]');
+                const Feedback = NavItem.getElement('[data-name="autoplay-feedback"]');
+
+                if (!NavLink) {
+                    return;
+                }
+
+                NavLink.removeClass('quiqqer-tabsAdvanced-nav-link--autoplayToggle');
+                NavLink.removeAttribute('title');
+                NavLink.removeAttribute('aria-label');
+
+                 if (Feedback) {
+                    Feedback.removeClass('is-play');
+                    Feedback.removeClass('is-pause');
+                }
+
+                if (NavItem !== self.ActiveNavTab || !self.options.autoplay) {
+                    return;
+                }
+
+                const actionLabel = self.$getAutoplayActionLabel();
+                const tabLabel = self.$getNavItemLabel(NavItem);
+                const description = tabLabel ? (tabLabel + '. ' + actionLabel) : actionLabel;
+
+                NavLink.addClass('quiqqer-tabsAdvanced-nav-link--autoplayToggle');
+                NavLink.setAttribute('title', actionLabel);
+                NavLink.setAttribute('aria-label', description);
+
+                if (Feedback) {
+                    Feedback.addClass(self._userPausedAutoplay ? 'is-play' : 'is-pause');
+                }
+            });
+        },
+
+        $showAutoplayFeedback: function (NavItem) {
+            if (!NavItem) {
+                return;
+            }
+
+            const Feedback = NavItem.getElement('[data-name="autoplay-feedback"]');
+
+            if (!Feedback) {
+                return;
+            }
+
+            if (Feedback._pressTimeout) {
+                clearTimeout(Feedback._pressTimeout);
+                Feedback._pressTimeout = null;
+            }
+
+            Feedback.removeClass('is-pressed');
+            void Feedback.offsetWidth;
+            Feedback.addClass('is-pressed');
+            Feedback._pressTimeout = setTimeout(function () {
+                Feedback.removeClass('is-pressed');
+                Feedback._pressTimeout = null;
+            }, 140);
+        },
+
+        $announceAutoplayState: function (action) {
+            const Live = this.getElm().getElement('[data-name="live-region"]');
+
+            if (!Live) {
+                return;
+            }
+
+            const localeKey = action === 'play'
+                ? 'frontend.control.tabs.slider.btn.label.play'
+                : 'frontend.control.tabs.slider.btn.label.pause';
+
+            Live.set('text', QUILocale.get(lg, localeKey));
         }
     });
 });
