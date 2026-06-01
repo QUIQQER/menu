@@ -470,35 +470,6 @@
             <en><![CDATA[Enables automatic tab switching. When enabled, the slider advances to the next tab automatically after the configured interval.]]></en>
         </locale>
 
-        <!-- Control: Tabs: autoplay controls (show/hide) -->
-        <locale name="control.tabs.autoPlay.controls">
-            <de><![CDATA[Play/Pause-Schaltfläche anzeigen (Steuerelement)]]></de>
-            <en><![CDATA[Show play/pause control]]></en>
-        </locale>
-        <locale name="control.tabs.autoPlay.controls.desc">
-            <de><![CDATA[Blendet eine Schaltfläche ein, mit der die automatische Wiedergabe gestartet oder pausiert werden kann.]]></de>
-            <en><![CDATA[Displays a button to start or pause the autoplay.]]></en>
-        </locale>
-
-        <!-- Control: Tabs: autoplay controls position -->
-        <locale name="control.tabs.autoPlay.controls.alignment">
-            <de><![CDATA[Position der Steuerelemente]]></de>
-            <en><![CDATA[Controls position]]></en>
-        </locale>
-        <locale name="control.tabs.autoPlay.controls.alignment.left">
-            <de><![CDATA[Links]]></de>
-            <en><![CDATA[Left]]></en>
-        </locale>
-        <locale name="control.tabs.autoPlay.controls.alignment.center">
-            <de><![CDATA[Zentriert]]></de>
-            <en><![CDATA[Center]]></en>
-        </locale>
-        <locale name="control.tabs.autoPlay.controls.alignment.right">
-            <de><![CDATA[Rechts]]></de>
-            <en><![CDATA[Right]]></en>
-        </locale>
-
-
         <!-- Control: Tabs: autoplay interval -->
         <locale name="control.tabs.autoPlay.interval">
             <de><![CDATA[Autoplay-Intervall (ms)]]></de>
@@ -509,12 +480,12 @@
             <en><![CDATA[Time in milliseconds before automatically switching to the next tab.]]></en>
         </locale>
         <locale name="control.tabs.autoPlay.pauseOnHover">
-            <de><![CDATA[Bei Mauskontakt pausieren]]></de>
+            <de><![CDATA[Autoplay bei Hover anhalten]]></de>
             <en><![CDATA[Pause on hover]]></en>
         </locale>
         <locale name="control.tabs.autoPlay.pauseOnHover.desc">
-            <de><![CDATA[Pausiert die automatische Wiedergabe, solange sich der Mauszeiger über dem gesamten Tab-Control befindet. Diese Option gilt nur, wenn die automatische Wiedergabe aktiv ist.]]></de>
-            <en><![CDATA[Pauses autoplay while the mouse pointer is over the entire tabs control. This option only applies when autoplay is enabled.]]></en>
+            <de><![CDATA[Hält den automatischen Wechsel nur vorübergehend an, solange sich der Mauszeiger über dem gesamten Tab-Control befindet. Die Autoplay-Einstellung selbst bleibt aktiv und läuft nach dem Verlassen weiter.]]></de>
+            <en><![CDATA[Temporarily pauses autoplay while the mouse pointer is over the entire tabs control. The autoplay setting itself remains active and continues after leaving the control.]]></en>
         </locale>
 
         <!-- Control: Tabs: progress indicator -->
@@ -690,9 +661,9 @@
             <de><![CDATA[Tab Einträge]]></de>
             <en><![CDATA[Tab entries]]></en>
         </locale>
-        <locale name="frontend.control.tabs.slider.btn.label.play.initial">
-            <de><![CDATA[Automatische Wiedergabe starten]]></de>
-            <en><![CDATA[Start autoplay]]></en>
+        <locale name="control.tabs.category.tabs">
+            <de><![CDATA[Tab Einträge]]></de>
+            <en><![CDATA[Tab entries]]></en>
         </locale>
         <locale name="frontend.control.tabs.slider.btn.label.play">
             <de><![CDATA[Automatische Wiedergabe fortsetzen]]></de>

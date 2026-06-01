@@ -85,7 +85,6 @@
     height: var(--_qui-menu-controls-tabs-navImgHeight, 20px);
     vertical-align: middle;
     display: block;
-    width: auto;
     margin-left: auto;
     margin-right: auto;
 }
@@ -132,44 +131,57 @@
     animation-play-state: var(--progress-state, running); /* running|paused */
 }
 
-.quiqqer-tabsAdvanced-sliderControl {
-    transition: var(--qui-transition);
-    text-align: var(--_qui-menu-controls-tabs-controlsAlignment, left);
-    padding-block: 1rem;
+.quiqqer-tabsAdvanced-nav-link--autoplayToggle {
+    cursor: pointer;
 }
 
-@media screen and (hover: hover) {
-    .quiqqer-tabsAdvanced-sliderControl__btn {
-        --_q-tabsAdvanced-sliderControl-btn-transition: var(--q-tabsAdvanced-sliderControl-btn-transition, 0.75s ease);
-    }
-
-    .quiqqer-tabsAdvanced-sliderControl__btn-label {
-        max-width: 0;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-        transition: var(--_q-tabsAdvanced-sliderControl-btn-transition);
-    }
-
-    .quiqqer-tabsAdvanced-sliderControl__btn:hover .quiqqer-tabsAdvanced-sliderControl__btn-label {
-        max-width: 350px;
-    }
-
-    .quiqqer-tabsAdvanced-sliderControl__btn .icon {
-        transition: var(--_q-tabsAdvanced-sliderControl-btn-transition);
-        margin-left: 0;
-    }
-
-    .quiqqer-tabsAdvanced-sliderControl__btn:not(:hover) .icon {
-        margin-left: -0.75em;
-    }
+.quiqqer-tabsAdvanced-nav-feedback {
+    position: absolute;
+    top: 0.35rem;
+    right: 0.35rem;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 999px;
+    pointer-events: none;
+    opacity: 0;
+    color: var(--_qui-menu-controls-tabs-accentColor, currentColor);
+    background: color-mix(in srgb, var(--qui-sheet-background, var(--qui-colors-background, rgb(255 255 255))) 94%, transparent);
+    border: 1px solid color-mix(in srgb, var(--_qui-menu-controls-tabs-accentColor, currentColor) 28%, transparent);
+    box-shadow: 0 0.15rem 0.4rem color-mix(in srgb, currentColor 12%, transparent);
+    transform: translate3d(0, -0.15rem, 0) scale(0.85);
+    transition: opacity 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
 }
 
-/* Sichtbarkeit der Icons je nach Status */
-.quiqqer-tabsAdvanced-sliderControl__btn.is-playing .fa-play { display: none; }
-.quiqqer-tabsAdvanced-sliderControl__btn.is-playing .fa-stop { display: inline-block; }
-.quiqqer-tabsAdvanced-sliderControl__btn.is-paused  .fa-play { display: inline-block; }
-.quiqqer-tabsAdvanced-sliderControl__btn.is-paused  .fa-stop { display: none; }
+.quiqqer-tabsAdvanced-nav-feedback .fa-play,
+.quiqqer-tabsAdvanced-nav-feedback .fa-pause {
+    display: none;
+    font-size: 0.75rem;
+    line-height: 1;
+}
+
+.quiqqer-tabsAdvanced-nav-feedback.is-play .fa-play,
+.quiqqer-tabsAdvanced-nav-feedback.is-pause .fa-pause {
+    display: block;
+}
+
+.quiqqer-tabsAdvanced-nav-feedback.is-pressed {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(0.92);
+    box-shadow: 0 0.18rem 0.5rem color-mix(in srgb, currentColor 14%, transparent);
+}
+
+@media screen and (hover: hover) and (pointer: fine) {
+    .active > .quiqqer-tabsAdvanced-nav-link--autoplayToggle:hover .quiqqer-tabsAdvanced-nav-feedback,
+    .active > .quiqqer-tabsAdvanced-nav-link--autoplayToggle:focus-visible .quiqqer-tabsAdvanced-nav-feedback {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+        box-shadow: 0 0.25rem 0.65rem color-mix(in srgb, currentColor 18%, transparent);
+    }
+}
 
 /*************/
 /* nav style */
@@ -257,8 +269,6 @@
 }
 
 .quiqqer-tabsAdvanced-content-image img {
-    width: auto;
-    height: auto;
     display: block;
 }
 

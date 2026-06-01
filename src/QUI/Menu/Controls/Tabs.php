@@ -36,8 +36,6 @@ class Tabs extends QUI\Control
 
             // autoplay & progress
             'autoPlay' => false, // enable / disable autoplay function
-            'autoPlay.controls' => false, // show play / pause button
-            'autoPlay.controls.alignment' => 'right', // left / center / right
             'autoPlay.interval' => 5000,
             'autoPlay.pauseOnHover' => false,
             'autoPlay.progress.indicator' => 'progressbar', // if empty no slider indicator will be shown
@@ -66,6 +64,7 @@ class Tabs extends QUI\Control
 
         parent::__construct($attributes);
 
+        $this->setAttribute('cacheable', 0);
         $this->addCSSFile(dirname(__FILE__) . '/Tabs.css');
     }
 
@@ -99,7 +98,7 @@ class Tabs extends QUI\Control
             $enabledEntries[] = $entry;
         }
 
-        $active = 1;
+        $active = null;
 
         $this->setJavaScriptControlOption('enabledragtoscroll', $this->getAttribute('enableDragToScroll'));
         $this->setJavaScriptControlOption('autoplay', $this->getAttribute('autoPlay'));
@@ -121,8 +120,12 @@ class Tabs extends QUI\Control
         }
 
         // 2) Fallback: activeEntry-Attribut (1-basiert)
-        if ($active === 1 && $this->getAttribute('activeEntry') && $this->getAttribute('activeEntry') > 0) {
+        if ($active === null && $this->getAttribute('activeEntry') && $this->getAttribute('activeEntry') > 0) {
             $active = (int)$this->getAttribute('activeEntry');
+        }
+
+        if ($active === null) {
+            $active = 1;
         }
 
         /* template */
@@ -177,11 +180,13 @@ class Tabs extends QUI\Control
         $navTabStyleCss = 'navTabStyle__imgLeft';
         $navAlignment = '';
         $navFillSpace = '';
-        $navImgHeight = $this->getAttribute('navImgHeight');
+        $navImgHeight = (int)$this->getAttribute('navImgHeight');
 
-        if ($navImgHeight) {
-            $this->setCustomVariable('navImgHeight', $navImgHeight);
+        if ($navImgHeight <= 0) {
+            $navImgHeight = 20;
         }
+
+        $this->setCustomVariable('navImgHeight', $navImgHeight . 'px');
 
         switch ($this->getAttribute('navStyle')) {
             case 'imgTop':
@@ -231,13 +236,6 @@ class Tabs extends QUI\Control
             $this->setCustomVariable('contentTextWidth', $contentTextWidth . 'px');
         }
 
-        $controlsAlignments = match ($this->getAttribute('autoPlay.controls.alignment')) {
-            'left', 'center', 'right' => $this->getAttribute('autoPlay.controls.alignment'),
-            default => 'left'
-        };
-
-        $this->setCustomVariable('controlsAlignment', $controlsAlignments);
-
         $animation = match ($this->getAttribute('animation')) {
             'fadeOutFadeIn',
             'scaleToSmallScaleFromLarge',
@@ -272,7 +270,8 @@ class Tabs extends QUI\Control
             'navLayout' => $navLayout,
             'navFillSpaceEnabled' => (bool)$this->getAttribute('navFillSpace'),
             'contentImgMaxWidth' => $contentImgMaxWidth,
-            'autoPlay' => $this->getAttribute('autoPlay')
+            'autoPlay' => $this->getAttribute('autoPlay'),
+            'navImgHeight' => $navImgHeight,
         ]);
 
         return $Engine->fetch(dirname(__FILE__) . '/Tabs.html');
