@@ -10,17 +10,22 @@
 
 use QUI\Menu\Independent\Items\AbstractMenuItem;
 
-QUI::$Ajax->registerFunction(
+QUI::getAjax()->registerFunction(
     'package_quiqqer_menu_ajax_backend_independent_getItemName',
-    function ($item) {
+    function ($item): string {
         $item = json_decode($item, true);
 
-        if (!class_exists($item['type'])) {
+        if (!is_array($item)) {
             return '';
         }
 
-        /* @var $Item AbstractMenuItem */
-        $Item = new $item['type']($item);
+        $type = $item['type'] ?? '';
+
+        if (!is_string($type) || !is_subclass_of($type, AbstractMenuItem::class)) {
+            return '';
+        }
+
+        $Item = new $type($item);
         return $Item->getName();
     },
     ['item'],
