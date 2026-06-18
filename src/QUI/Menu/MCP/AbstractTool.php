@@ -91,7 +91,7 @@ abstract class AbstractTool implements ToolInterface
         ];
 
         if ($withItems) {
-            $result['data'] = $data['data'] ?? [];
+            $result['data'] = $data['data'];
             $result['items'] = self::parseMenuItems($Menu->getChildren(false));
         }
 
@@ -117,7 +117,7 @@ abstract class AbstractTool implements ToolInterface
     }
 
     /**
-     * @param array<AbstractMenuItem> $items
+     * @param list<AbstractMenuItem> $items
      * @return array<int, array<string, mixed>>
      */
     protected static function parseMenuItems(array $items): array
@@ -228,6 +228,7 @@ abstract class AbstractTool implements ToolInterface
     }
 
     /**
+     * @param array<string, mixed> $data
      * @throws Exception
      */
     protected static function validateTypeData(string $type, array $data): void
@@ -248,6 +249,7 @@ abstract class AbstractTool implements ToolInterface
     }
 
     /**
+     * @param array<string, mixed> $data
      * @throws Exception
      */
     protected static function validateCommonData(array $data): void
@@ -271,11 +273,7 @@ abstract class AbstractTool implements ToolInterface
     protected static function getMenuDataTree(Menu $Menu): array
     {
         $menuData = $Menu->getData();
-        $data = $menuData['data'] ?? [];
-
-        if (!is_array($data)) {
-            $data = [];
-        }
+        $data = $menuData['data'];
 
         if (!isset($data['children']) || !is_array($data['children'])) {
             $data['children'] = [];
@@ -382,6 +380,10 @@ abstract class AbstractTool implements ToolInterface
         return $data;
     }
 
+    /**
+     * @param list<array<string, mixed>> $children
+     * @param array<string, mixed> $item
+     */
     protected static function insertAtPosition(array &$children, array $item, ?int $position): void
     {
         if (!is_int($position) || $position < 0 || $position >= count($children)) {
@@ -392,6 +394,10 @@ abstract class AbstractTool implements ToolInterface
         array_splice($children, $position, 0, [$item]);
     }
 
+    /**
+     * @param list<array<string, mixed>> $children
+     * @param array<string, mixed> $item
+     */
     protected static function insertItemBelow(array &$children, string $parentIdentifier, array $item, ?int $position): bool
     {
         foreach ($children as &$child) {
@@ -414,6 +420,10 @@ abstract class AbstractTool implements ToolInterface
         return false;
     }
 
+    /**
+     * @param list<array<string, mixed>> $children
+     * @param array<string, mixed> $item
+     */
     protected static function insertItemRelative(
         array &$children,
         string $referenceIdentifier,
@@ -435,6 +445,10 @@ abstract class AbstractTool implements ToolInterface
 
         return false;
     }
+    /**
+     * @param list<array<string, mixed>> $children
+     * @param array<string, mixed> $patch
+     */
     protected static function updateItemByIdentifier(array &$children, string $identifier, array $patch): bool
     {
         foreach ($children as &$child) {
@@ -459,6 +473,9 @@ abstract class AbstractTool implements ToolInterface
         return false;
     }
 
+    /**
+     * @param list<array<string, mixed>> $children
+     */
     protected static function deleteItemByIdentifier(array &$children, string $identifier): bool
     {
         foreach ($children as $index => &$child) {

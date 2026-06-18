@@ -103,7 +103,7 @@ class UrlList extends QUI\Control
     /**
      * Get sites for independent menu
      *
-     * @return array
+     * @return list<Independent\Items\AbstractMenuItem>
      * @throws QUI\Exception
      */
     public function getChildrenForIndependentMenu(): array
@@ -116,7 +116,7 @@ class UrlList extends QUI\Control
     /**
      * Get sites for QUI site
      *
-     * @return array|int
+     * @return array<int, QUI\Projects\Site>|int
      * @throws Exception
      */
     public function getChildrenForQUISite(): array|int
@@ -143,7 +143,7 @@ class UrlList extends QUI\Control
 
     /**
      * @param QUI\Projects\Site $Site
-     * @return array|int
+     * @return array<int, QUI\Projects\Site>|int
      * @throws QUI\Exception
      */
     public function getChildren(QUI\Projects\Site $Site): array|int

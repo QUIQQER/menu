@@ -94,6 +94,12 @@ class DropDownMenu extends QUI\Control
             return $this->getAttribute('Site');
         }
 
-        return QUI::getRewrite()->getSite();
+        $Site = QUI::getRewrite()->getSite();
+
+        if ($Site === null) {
+            throw new QUI\Exception('No rewrite site available.');
+        }
+
+        return $Site;
     }
 }

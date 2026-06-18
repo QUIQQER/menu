@@ -15,7 +15,7 @@ use QUI\Interfaces\Projects\Site;
 abstract class AbstractChild extends QUI\Control
 {
     /**
-     * @var null|array
+     * @var array<int, Site>|null
      */
     protected ?array $children = null;
 
@@ -31,17 +31,24 @@ abstract class AbstractChild extends QUI\Control
             return $this->getAttribute('Site');
         }
 
-        return QUI::getRewrite()->getSite();
+        $Site = QUI::getRewrite()->getSite();
+
+        if ($Site === null) {
+            throw new Exception('No rewrite site available.');
+        }
+
+        return $Site;
     }
 
     /**
-     * @return array|null
+     * @return array<int, Site>|null
      * @throws Exception
      */
     public function getChildren(): ?array
     {
         if (is_null($this->children)) {
-            $this->children = $this->getSite()->getNavigation();
+            $children = $this->getSite()->getNavigation();
+            $this->children = is_array($children) ? $children : [];
         }
 
         return $this->children;
@@ -55,6 +62,6 @@ abstract class AbstractChild extends QUI\Control
      */
     public function count(): int
     {
-        return count($this->getChildren());
+        return count($this->getChildren() ?? []);
     }
 }

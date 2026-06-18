@@ -26,7 +26,7 @@ class NavTabs extends QUI\Control
      *   'content' => string
      * ]
      *
-     * @var list<array{title: mixed, content: string}>
+     * @var list<array{title: mixed, content: mixed}>
      */
     private array $entries = [];
 
@@ -83,10 +83,10 @@ class NavTabs extends QUI\Control
     /**
      * Get children sites from parent site
      *
-     * @return array|string
+     * @return list<array{title: mixed, content: mixed}>
      * @throws QUI\Exception
      */
-    private function getChildrenFromParent(): array | string
+    private function getChildrenFromParent(): array
     {
         $ParentSite = null;
 
@@ -96,16 +96,20 @@ class NavTabs extends QUI\Control
             } catch (QUI\Exception $Exception) {
                 QUI\System\Log::addDebug($Exception->getMessage());
 
-                return '';
+                return [];
             }
         }
 
-        $sites = $ParentSite->getChildren([
+        $sites = $ParentSite?->getChildren([
             'where' => [
                 'active' => 1,
             ],
             'limit' => $this->getAttribute('max')
-        ]);
+        ]) ?? [];
+
+        if (!is_array($sites)) {
+            return [];
+        }
 
         $entries = [];
 
@@ -141,7 +145,7 @@ class NavTabs extends QUI\Control
      *   .....................
      * ]
      *
-     * @param array $data
+     * @param array<int, array<int, mixed>> $data
      * @return false|void
      */
     public function setData(array $data)

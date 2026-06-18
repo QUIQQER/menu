@@ -174,6 +174,7 @@ class SidebarDropDownMenu extends QUI\Control
     }
 
     /**
+     * @return array<int, QUI\Projects\Site>|int
      * @throws QUI\Exception
      */
     public function getChildren(QUI\Projects\Site $Site): array|int
