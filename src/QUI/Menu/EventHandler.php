@@ -77,10 +77,10 @@ class EventHandler
     }
 
     /**
-     * @param $menuId
+     * @param mixed $menuId
      * @return void
      */
-    public static function onQuiqqerMenuIndependentClear($menuId): void
+    public static function onQuiqqerMenuIndependentClear(mixed $menuId): void
     {
         QUI\Cache\Manager::clear(self::menuCacheName());
     }

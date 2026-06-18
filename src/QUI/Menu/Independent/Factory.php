@@ -4,9 +4,10 @@ namespace QUI\Menu\Independent;
 
 use Exception;
 use QUI;
+use QUI\Interfaces\Users\User;
 
 /**
- *
+ * Menu factory
  */
 class Factory
 {
@@ -14,9 +15,9 @@ class Factory
      * @throws QUI\Database\Exception
      * @throws QUI\Exception
      */
-    public static function createMenu(): Menu
+    public static function createMenu(?User $PermissionUser = null): Menu
     {
-        QUI\Permissions\Permission::checkPermission('quiqqer.menu.create');
+        QUI\Permissions\Permission::checkPermission('quiqqer.menu.create', $PermissionUser);
 
         QUI::getDataBase()->insert(Handler::table(), [
             'title' => '',
@@ -42,9 +43,9 @@ class Factory
      * @throws QUI\Database\Exception
      * @throws QUI\Permissions\Exception
      */
-    public static function deleteMenu(int $menuId): void
+    public static function deleteMenu(int $menuId, ?User $PermissionUser = null): void
     {
-        QUI\Permissions\Permission::checkPermission('quiqqer.menu.delete');
+        QUI\Permissions\Permission::checkPermission('quiqqer.menu.delete', $PermissionUser);
 
         QUI::getDataBase()->delete(Handler::table(), [
             'id' => $menuId

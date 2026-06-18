@@ -409,6 +409,10 @@
             <de><![CDATA[QUIQQER Menü]]></de>
             <en><![CDATA[QUIQQER Menu]]></en>
         </locale>
+        <locale name="permission.quiqqer.menu.mcp.canUse">
+            <de><![CDATA[Darf die Menü-MCP-Tools verwenden]]></de>
+            <en><![CDATA[Can use the menu MCP tools]]></en>
+        </locale>
         <locale name="permission.quiqqer.menu.create">
             <de><![CDATA[Darf Menüs anlegen]]></de>
             <en><![CDATA[Is allowed to create menus]]></en>

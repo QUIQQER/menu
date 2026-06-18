@@ -7,6 +7,7 @@ use QUI;
 use QUI\Menu\Independent\Items\AbstractMenuItem;
 
 use function array_filter;
+use function array_values;
 use function class_exists;
 use function is_array;
 use function is_numeric;
@@ -22,14 +23,18 @@ use function json_encode;
 class Menu
 {
     protected int $id;
+    /** @var array<string, string>|null */
     protected ?array $title = null;
+    /** @var array<string, string>|null */
     protected ?array $workingTitle = null;
+    /** @var array<string, mixed> */
     protected array $data = [];
+    /** @var list<AbstractMenuItem> */
     protected array $children = [];
     protected int $currentChildId = 0;
 
     /**
-     * @param int|array $menuId - menu id or menu data
+     * @param int|array<string, mixed> $menuId - menu id or menu data
      *
      * @throws QUI\Exception
      * @throws QUI\Database\Exception
@@ -56,16 +61,24 @@ class Menu
             }
         }
 
-        $this->id = $data['id'];
+        $this->id = (int)$data['id'];
 
         if (is_string($data['title'])) {
-            $this->title = json_decode($data['title'], true);
+            $title = json_decode($data['title'], true);
+
+            if (is_array($title)) {
+                $this->title = $title;
+            }
         } elseif (is_array($data['title'])) {
             $this->title = $data['title'];
         }
 
         if (is_string($data['workingTitle'])) {
-            $this->workingTitle = json_decode($data['workingTitle'], true);
+            $workingTitle = json_decode($data['workingTitle'], true);
+
+            if (is_array($workingTitle)) {
+                $this->workingTitle = $workingTitle;
+            }
         } elseif (is_array($data['workingTitle'])) {
             $this->workingTitle = $data['workingTitle'];
         }
@@ -73,15 +86,15 @@ class Menu
         if (is_string($data['data'])) {
             $decode = json_decode($data['data'], true);
 
-            if ($decode) {
-                $this->data = json_decode($data['data'], true);
+            if (is_array($decode)) {
+                $this->data = $decode;
             }
         } elseif (is_array($data['data'])) {
             $this->data = $data['data'];
         }
 
         // build children
-        if (isset($this->data['children'])) {
+        if (isset($this->data['children']) && is_array($this->data['children'])) {
             $this->buildChildren($this, $this->data['children']);
         }
     }
@@ -90,15 +103,15 @@ class Menu
 
     /**
      * @param AbstractMenuItem|Menu $Parent
-     * @param array $children
+     * @param array<array-key, array<string, mixed>> $children
      * @return void
      */
     protected function buildChildren(AbstractMenuItem | Menu $Parent, array $children): void
     {
         foreach ($children as $item) {
-            $type = $item['type'];
+            $type = $item['type'] ?? null;
 
-            if (!class_exists($type)) {
+            if (!is_string($type) || !class_exists($type)) {
                 continue;
             }
 
@@ -134,7 +147,7 @@ class Menu
      * Return the children of this menu
      *
      * @param bool $onlyActive - if true, returns only the active children, if false, all children are returned
-     * @return array
+     * @return list<AbstractMenuItem>
      */
     public function getChildren(bool $onlyActive = true): array
     {
@@ -142,9 +155,9 @@ class Menu
             return $this->children;
         }
 
-        return array_filter($this->children, function ($Item) {
+        return array_values(array_filter($this->children, function (AbstractMenuItem $Item): bool {
             return $Item->isActive();
-        });
+        }));
     }
 
     //endregion
@@ -152,7 +165,7 @@ class Menu
     //region getter
 
     /**
-     * @return array
+     * @return array{id: int, title: string, workingTitle: string, data: array<string, mixed>}
      */
     public function toArray(): array
     {
@@ -164,8 +177,9 @@ class Menu
         ];
     }
 
-    public function getNewItemId()
+    public function getNewItemId(): int
     {
+        return ++$this->currentChildId;
     }
 
     /**
@@ -223,7 +237,7 @@ class Menu
     }
 
     /**
-     * @return array
+     * @return array{id: int, title: array<string, string>|null, workingTitle: array<string, string>|null, data: array<string, mixed>}
      */
     public function getData(): array
     {
@@ -267,7 +281,7 @@ class Menu
     /**
      * set the titles in different languages
      *
-     * @param array|null $title - ['de' => '', 'en' => '']
+     * @param array<string, string>|null $title - ['de' => '', 'en' => '']
      * @return void
      */
     public function setTitle(?array $title): void
@@ -283,7 +297,7 @@ class Menu
         $available = QUI::availableLanguages();
 
         foreach ($available as $language) {
-            if (isset($title[$language]) && is_string($title[$language])) {
+            if (isset($title[$language])) {
                 $this->title[$language] = $title[$language];
             }
         }
@@ -292,7 +306,7 @@ class Menu
     /**
      * set the working titles in different languages
      *
-     * @param array|null $title - ['de' => '', 'en' => '']
+     * @param array<string, string>|null $title - ['de' => '', 'en' => '']
      * @return void
      */
     public function setWorkingTitle(?array $title): void
@@ -308,14 +322,14 @@ class Menu
         $available = QUI::availableLanguages();
 
         foreach ($available as $language) {
-            if (isset($title[$language]) && is_string($title[$language])) {
+            if (isset($title[$language])) {
                 $this->workingTitle[$language] = $title[$language];
             }
         }
     }
 
     /**
-     * @param array|null $data
+     * @param array<string, mixed>|null $data
      * @return void
      */
     public function setData(?array $data): void
@@ -325,7 +339,7 @@ class Menu
         }
 
         if (isset($data['children'])) {
-            $data = $this->checkData($data);
+            $data = $this->sanitizeData($data);
 
             if ($data) {
                 $this->data = $data;
@@ -334,12 +348,23 @@ class Menu
     }
 
     /**
+     * Checks a data array and filters not allowed entries.
+     *
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>|null
+     */
+    public function sanitizeData(array $data): ?array
+    {
+        return $this->checkData($data);
+    }
+
+    /**
      * Checks a data array and filters not allowed entries
      *
-     * @param $data
-     * @return array|null
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>|null
      */
-    protected function checkData($data): ?array
+    protected function checkData(array $data): ?array
     {
         $result = [];
 
@@ -347,10 +372,14 @@ class Menu
             $result['children'] = [];
 
             foreach ($data['children'] as $item) {
+                if (!is_array($item)) {
+                    continue;
+                }
+
                 $child = $this->checkMenuDataItem($item);
 
                 if ($child) {
-                    $result['children'][] = $this->checkMenuDataItem($item);
+                    $result['children'][] = $child;
                 }
             }
         }
@@ -363,8 +392,8 @@ class Menu
     }
 
     /**
-     * @param array $item
-     * @return array|null
+     * @param array<string, mixed> $item
+     * @return array<string, mixed>|null
      */
     protected function checkMenuDataItem(array $item): ?array
     {
@@ -374,7 +403,9 @@ class Menu
             $result['title'] = $item['title'];
         }
 
-        if (!isset($item['identifier'])) {
+        if (isset($item['identifier']) && is_string($item['identifier']) && $item['identifier'] !== '') {
+            $result['identifier'] = $item['identifier'];
+        } else {
             $result['identifier'] = QUI\Utils\Uuid::get();
         }
 
@@ -387,25 +418,29 @@ class Menu
             $result['icon'] = $item['icon'];
         }
 
-        if (
-            isset($item['type'])
-            && class_exists($item['type'])
-            && new $item['type']() instanceof AbstractMenuItem
-        ) {
-            $result['type'] = $item['type'];
+        if (isset($item['type']) && is_string($item['type']) && class_exists($item['type'])) {
+            $Item = new $item['type']();
+
+            if ($Item instanceof AbstractMenuItem) {
+                $result['type'] = $item['type'];
+            }
         }
 
         if (isset($item['children'])) {
-            foreach ($item['children'] as $item) {
-                $child = $this->checkMenuDataItem($item);
+            foreach ($item['children'] as $childItem) {
+                if (!is_array($childItem)) {
+                    continue;
+                }
+
+                $child = $this->checkMenuDataItem($childItem);
 
                 if ($child) {
-                    $result['children'][] = $this->checkMenuDataItem($item);
+                    $result['children'][] = $child;
                 }
             }
         }
 
-        if (empty($result) || !isset($result['title']) || !isset($result['type'])) {
+        if (!isset($result['title']) || !isset($result['type'])) {
             return null;
         }
 

@@ -6,6 +6,7 @@ use QUI;
 use QUI\Locale;
 
 use function array_filter;
+use function array_values;
 use function is_array;
 use function is_string;
 use function json_decode;
@@ -15,11 +16,13 @@ use function json_decode;
  */
 abstract class AbstractMenuItem
 {
+    /** @var array<string, mixed> */
     protected array $attributes = [];
+    /** @var list<AbstractMenuItem> */
     protected array $children = [];
 
     /**
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct(array $attributes = [])
     {
@@ -34,7 +37,7 @@ abstract class AbstractMenuItem
      */
     public function getType(): string
     {
-        return $this->attributes['type'];
+        return is_string($this->attributes['type'] ?? null) ? $this->attributes['type'] : '';
     }
 
     /**
@@ -54,7 +57,7 @@ abstract class AbstractMenuItem
             $title = json_decode($title, true);
         }
 
-        if (isset($title[$current])) {
+        if (is_array($title) && isset($title[$current]) && is_string($title[$current])) {
             return $title[$current];
         }
 
@@ -84,7 +87,7 @@ abstract class AbstractMenuItem
             $short = json_decode($short, true);
         }
 
-        if (isset($short[$current])) {
+        if (is_array($short) && isset($short[$current]) && is_string($short[$current])) {
             return $short[$current];
         }
 
@@ -111,7 +114,7 @@ abstract class AbstractMenuItem
                 $name = $data['name'];
             }
 
-            if (isset($name[$current])) {
+            if (is_array($name) && isset($name[$current]) && is_string($name[$current])) {
                 return $name[$current];
             }
         }
@@ -145,7 +148,7 @@ abstract class AbstractMenuItem
     public function getIcon(): string
     {
         if (isset($this->attributes['icon'])) {
-            return $this->attributes['icon'];
+            return is_string($this->attributes['icon']) ? $this->attributes['icon'] : '';
         }
 
         return '';
@@ -157,7 +160,7 @@ abstract class AbstractMenuItem
     public function getIdentifier(): string
     {
         if (isset($this->attributes['identifier'])) {
-            return $this->attributes['identifier'];
+            return is_string($this->attributes['identifier']) ? $this->attributes['identifier'] : '';
         }
 
         return '';
@@ -171,7 +174,7 @@ abstract class AbstractMenuItem
         $data = $this->getCustomData();
 
         if (is_array($data) && isset($data['rel'])) {
-            return $data['rel'];
+            return is_string($data['rel']) ? $data['rel'] : '';
         }
 
         return '';
@@ -192,7 +195,7 @@ abstract class AbstractMenuItem
                 case "_blank":
                 case "_top":
                 case "_parent":
-                    return $data['target'];
+                    return is_string($data['target']) ? $data['target'] : '';
             }
         }
 
@@ -209,7 +212,7 @@ abstract class AbstractMenuItem
         $data = $this->getCustomData();
 
         if (is_array($data) && isset($data['menuType'])) {
-            return $data['menuType'];
+            return is_string($data['menuType']) ? $data['menuType'] : '';
         }
 
         return '';
@@ -307,7 +310,7 @@ abstract class AbstractMenuItem
 
     //region type stuff
 
-    abstract public static function itemTitle();
+    abstract public static function itemTitle(): string;
 
     /**
      * Short description of the menu types
@@ -343,7 +346,7 @@ abstract class AbstractMenuItem
      * Return the children of this item
      *
      * @param bool $onlyActive - if true, returns only the active children, if false, all children are returned
-     * @return AbstractMenuItem[]
+     * @return list<AbstractMenuItem>
      */
     public function getChildren(bool $onlyActive = true): array
     {
@@ -351,9 +354,9 @@ abstract class AbstractMenuItem
             return $this->children;
         }
 
-        return array_filter($this->children, function ($Item) {
+        return array_values(array_filter($this->children, function (AbstractMenuItem $Item): bool {
             return $Item->isActive();
-        });
+        }));
     }
 
     /**

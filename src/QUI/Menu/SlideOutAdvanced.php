@@ -19,7 +19,7 @@ use function dirname;
 class SlideOutAdvanced extends QUI\Control
 {
     /**
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct(array $attributes = [])
     {
@@ -84,6 +84,12 @@ class SlideOutAdvanced extends QUI\Control
             return $this->getAttribute('Site');
         }
 
-        return QUI::getRewrite()->getSite();
+        $Site = QUI::getRewrite()->getSite();
+
+        if ($Site === null) {
+            throw new QUI\Exception('No rewrite site available.');
+        }
+
+        return $Site;
     }
 }
