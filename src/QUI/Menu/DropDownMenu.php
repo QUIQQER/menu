@@ -26,7 +26,7 @@ use function serialize;
 class DropDownMenu extends QUI\Control
 {
     /**
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct(array $attributes = [])
     {

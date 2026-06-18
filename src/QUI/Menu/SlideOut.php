@@ -18,7 +18,7 @@ use QUI;
 class SlideOut extends QUI\Control
 {
     /**
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct(array $attributes = [])
     {

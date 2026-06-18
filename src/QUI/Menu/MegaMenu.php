@@ -29,12 +29,12 @@ class MegaMenu extends AbstractMenu
     protected SlideOutAdvanced | null | SlideOut $Mobile = null;
 
     /**
-     * @var array
+     * @var list<class-string>
      */
     protected array $subMenus = [];
 
     /**
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      * @throws QUI\Exception
      * @throws Exception
      */

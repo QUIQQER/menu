@@ -28,7 +28,7 @@ use QUI\Projects\Site\Utils;
 class UrlList extends QUI\Control
 {
     /**
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct(array $attributes = [])
     {

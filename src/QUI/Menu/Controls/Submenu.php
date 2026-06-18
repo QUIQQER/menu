@@ -28,7 +28,7 @@ class Submenu extends QUI\Control
     private string $templateCssFile;
 
     /**
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct(array $attributes = [])
     {

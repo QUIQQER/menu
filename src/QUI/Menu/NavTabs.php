@@ -26,12 +26,12 @@ class NavTabs extends QUI\Control
      *   'content' => string
      * ]
      *
-     * @var array
+     * @var list<array{title: mixed, content: string}>
      */
     private array $entries = [];
 
     /**
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct(array $attributes = [])
     {

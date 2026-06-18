@@ -28,7 +28,7 @@ use Throwable;
 class Provider implements ProviderInterface
 {
     /**
-     * @var array<ToolInterface>
+     * @var list<ToolInterface>
      */
     protected array $tools;
 
