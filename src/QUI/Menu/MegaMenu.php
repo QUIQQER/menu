@@ -29,12 +29,12 @@ class MegaMenu extends AbstractMenu
     protected SlideOutAdvanced | null | SlideOut $Mobile = null;
 
     /**
-     * @var array
+     * @var list<class-string>
      */
     protected array $subMenus = [];
 
     /**
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      * @throws QUI\Exception
      * @throws Exception
      */
@@ -139,7 +139,10 @@ class MegaMenu extends AbstractMenu
 
             foreach ($cacheResult['subMenus'] as $childControl) {
                 $Instance = new $childControl();
-                $cssFiles = array_merge($cssFiles, $Instance->getCSSFiles());
+
+                if ($Instance instanceof QUI\Control) {
+                    $cssFiles = array_merge($cssFiles, $Instance->getCSSFiles());
+                }
             }
 
             foreach ($cssFiles as $cssFile) {
@@ -247,10 +250,10 @@ class MegaMenu extends AbstractMenu
     /**
      * Return the menu control class name for a menu control shortcut
      *
-     * @param $control
+     * @param mixed $control
      * @return false|string
      */
-    public function getMenuControl($control): bool | string
+    public function getMenuControl(mixed $control): bool | string
     {
         switch ($control) {
             case 'Image':
@@ -308,9 +311,9 @@ class MegaMenu extends AbstractMenu
     }
 
     /**
-     * @param $subMenu
+     * @param class-string $subMenu
      */
-    public function addSubMenu($subMenu): void
+    public function addSubMenu(string $subMenu): void
     {
         $this->subMenus[] = $subMenu;
     }
@@ -327,18 +330,24 @@ class MegaMenu extends AbstractMenu
             return $this->getAttribute('Site');
         }
 
-        return QUI::getRewrite()->getSite();
+        $Site = QUI::getRewrite()->getSite();
+
+        if ($Site === null) {
+            throw new QUI\Exception('No rewrite site available.');
+        }
+
+        return $Site;
     }
 
     /**
      * Get mobile menu (slideout or slideoutAdvanced) depend on project setting
      *
-     * @param $slideOutParam
+     * @param array<string, mixed> $slideOutParam
      * @return SlideOutAdvanced|SlideOut
      * @throws QUI\Exception
      * @throws Exception
      */
-    protected function getMobileMenu($slideOutParam): SlideOut | SlideOutAdvanced
+    protected function getMobileMenu(array $slideOutParam): SlideOut | SlideOutAdvanced
     {
         if ($this->getProject()->getConfig('mobileMenu.settings.type') == 'slideoutAdvanced') {
             $Menu = new QUI\Menu\SlideOutAdvanced($slideOutParam);

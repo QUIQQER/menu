@@ -28,7 +28,7 @@ class Submenu extends QUI\Control
     private string $templateCssFile;
 
     /**
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct(array $attributes = [])
     {
@@ -78,9 +78,7 @@ class Submenu extends QUI\Control
 
         $url = false;
 
-        if (QUI::getRewrite()->getSite()->getUrlRewritten()) {
-            $url = QUI::getRewrite()->getSite()->getUrlRewritten();
-        }
+        $url = QUI::getRewrite()->getSite()?->getUrlRewritten() ?: false;
 
         $Engine = QUI::getTemplateManager()->getEngine();
 
@@ -207,7 +205,7 @@ class Submenu extends QUI\Control
     /**
      * Get sites for independent menu
      *
-     * @return array
+     * @return list<Independent\Items\AbstractMenuItem>
      * @throws QUI\Exception
      */
     public function getChildrenForIndependentMenu(): array
@@ -220,7 +218,7 @@ class Submenu extends QUI\Control
     /**
      * Get sites for QUI site
      *
-     * @return array|int
+     * @return array<int, QUI\Projects\Site>|int
      * @throws Exception
      */
     public function getChildrenForQUISite(): array|int
@@ -247,7 +245,7 @@ class Submenu extends QUI\Control
 
     /**
      * @param QUI\Projects\Site $Site
-     * @return array|int
+     * @return array<int, QUI\Projects\Site>|int
      * @throws QUI\Exception
      */
     public function getChildren(QUI\Projects\Site $Site): array|int

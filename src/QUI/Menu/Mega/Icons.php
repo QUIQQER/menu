@@ -16,14 +16,14 @@ use QUI;
 class Icons extends AbstractChild
 {
     /**
-     * @var array|null
+     * @var array<int, QUI\Projects\Site>|null
      */
     protected ?array $children = null;
 
     /**
      * Standard constructor.
      *
-     * @param array $params
+     * @param array<string, mixed> $params
      */
     public function __construct(array $params = [])
     {

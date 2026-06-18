@@ -9,7 +9,7 @@
  *
  * @return array
  */
-QUI::$Ajax->registerFunction(
+QUI::getAjax()->registerFunction(
     'package_quiqqer_menu_ajax_backend_independent_list',
     function ($page, $limit) {
         $result = QUI\Menu\Independent\Handler::getList();

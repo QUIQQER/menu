@@ -3,7 +3,9 @@
 namespace QUI\Menu\Independent;
 
 use QUI;
+use QUI\Menu\Independent\Items\AbstractMenuItem;
 
+use function is_scalar;
 use function md5;
 
 /**
@@ -44,6 +46,7 @@ class Handler
             $project = $Project->getName();
             $lang = $Project->getLang();
             $template = $Project->getAttribute('template');
+            $template = is_scalar($template) ? (string)$template : '';
             $projectHash = '/' . md5($project . '/' . $lang . '/' . $template);
         } else {
             $projectHash = '';
@@ -58,7 +61,7 @@ class Handler
 
     /**
      * @param int $menuId
-     * @return array
+     * @return array<string, mixed>
      *
      * @throws QUI\Database\Exception
      * @throws QUI\Exception
@@ -87,7 +90,7 @@ class Handler
     }
 
     /**
-     * @return Menu[]
+     * @return list<Menu>
      * @throws QUI\Database\Exception
      */
     public static function getList(): array
@@ -110,7 +113,7 @@ class Handler
     }
 
     /**
-     * @return string[]
+     * @return list<class-string<AbstractMenuItem>>
      *
      * @todo Item Class Provider -> API
      */

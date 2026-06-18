@@ -4,7 +4,7 @@
  * This file contains package_quiqqer_menu_ajax_backend_independent_save
  */
 
-QUI::$Ajax->registerFunction(
+QUI::getAjax()->registerFunction(
     'package_quiqqer_menu_ajax_backend_independent_save',
     function ($id, $title, $workingTitle, $data) {
         $title = json_decode($title, true);

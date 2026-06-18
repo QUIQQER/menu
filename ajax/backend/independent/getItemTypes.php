@@ -4,23 +4,29 @@
  * This file contains package_quiqqer_menu_ajax_backend_independent_getItemTypes
  */
 
+use QUI\Menu\Independent\Items\AbstractMenuItem;
+
 /**
  * Returns all menus
  *
- * @return array
+ * @return array<int, array<string, string>>
  */
-QUI::$Ajax->registerFunction(
+QUI::getAjax()->registerFunction(
     'package_quiqqer_menu_ajax_backend_independent_getItemTypes',
-    function () {
+    function (): array {
         $list = QUI\Menu\Independent\Handler::getItemList();
         $result = [];
 
         foreach ($list as $class) {
+            if (!is_subclass_of($class, AbstractMenuItem::class)) {
+                continue;
+            }
+
             $result[] = [
-                'title' => call_user_func([$class, 'itemTitle']),
-                'desc' => call_user_func([$class, 'itemShort']),
-                'icon' => call_user_func([$class, 'itemIcon']),
-                'jsControl' => call_user_func([$class, 'itemJsControl']),
+                'title' => $class::itemTitle(),
+                'desc' => $class::itemShort(),
+                'icon' => $class::itemIcon(),
+                'jsControl' => $class::itemJsControl(),
                 'class' => $class
             ];
         }
