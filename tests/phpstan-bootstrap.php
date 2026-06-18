@@ -18,3 +18,6 @@ require_once __DIR__ . '/stubs/QUI/AI/MCP/Server.php';
 require_once __DIR__ . '/stubs/QUI/AI/MCP/ToolHelper.php';
 require_once __DIR__ . '/stubs/QUI/MCP/ToolInterface.php';
 require_once __DIR__ . '/stubs/QUI/CoreRest/Handler.php';
+require_once __DIR__ . '/stubs/QUI/REST/ProviderInterface.php';
+require_once __DIR__ . '/stubs/QUI/REST/SlimApp.php';
+require_once __DIR__ . '/stubs/QUI/REST/Server.php';
