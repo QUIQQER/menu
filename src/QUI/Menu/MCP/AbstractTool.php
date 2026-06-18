@@ -381,7 +381,7 @@ abstract class AbstractTool implements ToolInterface
     }
 
     /**
-     * @param list<array<string, mixed>> $children
+     * @param array<array-key, array<string, mixed>> $children
      * @param array<string, mixed> $item
      */
     protected static function insertAtPosition(array &$children, array $item, ?int $position): void
@@ -395,7 +395,7 @@ abstract class AbstractTool implements ToolInterface
     }
 
     /**
-     * @param list<array<string, mixed>> $children
+     * @param array<array-key, array<string, mixed>> $children
      * @param array<string, mixed> $item
      */
     protected static function insertItemBelow(array &$children, string $parentIdentifier, array $item, ?int $position): bool
@@ -421,7 +421,7 @@ abstract class AbstractTool implements ToolInterface
     }
 
     /**
-     * @param list<array<string, mixed>> $children
+     * @param array<array-key, array<string, mixed>> $children
      * @param array<string, mixed> $item
      */
     protected static function insertItemRelative(
@@ -446,7 +446,7 @@ abstract class AbstractTool implements ToolInterface
         return false;
     }
     /**
-     * @param list<array<string, mixed>> $children
+     * @param array<array-key, array<string, mixed>> $children
      * @param array<string, mixed> $patch
      */
     protected static function updateItemByIdentifier(array &$children, string $identifier, array $patch): bool
@@ -474,7 +474,7 @@ abstract class AbstractTool implements ToolInterface
     }
 
     /**
-     * @param list<array<string, mixed>> $children
+     * @param array<array-key, array<string, mixed>> $children
      */
     protected static function deleteItemByIdentifier(array &$children, string $identifier): bool
     {

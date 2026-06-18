@@ -15,11 +15,12 @@ use QUI\REST\Server;
 use QUI\Utils\Security\Orthos;
 use Slim\Routing\RouteCollectorProxy;
 
+use function get_object_vars;
 use function is_array;
+use function is_object;
+use function is_string;
 
 /**
- * Class Provider
- *
  * REST API endpoints for QUIQQER Menus.
  */
 class Provider implements ProviderInterface
@@ -33,9 +34,7 @@ class Provider implements ProviderInterface
     {
         $Slim = $Server->getSlim();
 
-        // Register paths
         $Slim->group('/menus', function (RouteCollectorProxy $RouteCollector) {
-            // CRUD
             $RouteCollector->post('/create', [$this, 'create']);
             $RouteCollector->get('/get', [$this, 'get']);
             $RouteCollector->patch('/update', [$this, 'update']);
@@ -52,63 +51,36 @@ class Provider implements ProviderInterface
      */
     public function create(RequestInterface $Request, ResponseInterface $Response): MessageInterface
     {
-        $params = $Request->getParsedBody();
-        $menu = [];
+        $params = self::getParsedBodyData($Request);
+        $title = self::getLocaleMap($params['title'] ?? null);
 
-        $requiredFields = [
-            'title'
-        ];
-
-        foreach ($requiredFields as $field) {
-            if (empty($params[$field])) {
-                return Handler::getGenericErrorResponse('Field "' . $field . '" is missing.');
-            }
-
-            if (is_array($params[$field])) {
-                $value = Orthos::clearArray($params[$field]);
-            } else {
-                $value = Orthos::clear($params[$field]);
-            }
-
-            $menu[$field] = $value;
+        if ($title === null) {
+            return Handler::getGenericErrorResponse('Field "title" is missing.');
         }
 
-        $optionalFields = [
-            'id',
-            'workingTitle',
-            'data'
+        $menu = [
+            'title' => $title
         ];
 
-        foreach ($optionalFields as $field) {
-            if (empty($params[$field])) {
-                continue;
-            }
+        if (!empty($params['id'])) {
+            $menu['id'] = (int)Orthos::clear($params['id']);
+        }
 
-            $value = $params[$field];
+        $workingTitle = self::getLocaleMap($params['workingTitle'] ?? null);
 
-            switch ($field) {
-                case 'data':
-                    break;
+        if ($workingTitle !== null) {
+            $menu['workingTitle'] = $workingTitle;
+        }
 
-                default:
-                    if (is_array($params[$field])) {
-                        $value = Orthos::clearArray($params[$field]);
-                    } else {
-                        $value = Orthos::clear($params[$field]);
-                    }
-            }
-
-            $menu[$field] = $value;
+        if (isset($params['data']) && is_array($params['data'])) {
+            $menu['data'] = $params['data'];
         }
 
         try {
-            /*
-             * If the menu has to have a specific ID, we have to make sure that the ID is not taken.
-             */
             $menuId = false;
 
             if (!empty($menu['id'])) {
-                $menuId = (int)$menu['id'];
+                $menuId = $menu['id'];
 
                 try {
                     $Menu = MenuHandler::getMenu($menuId);
@@ -172,23 +144,16 @@ class Provider implements ProviderInterface
      */
     public function get(RequestInterface $Request, ResponseInterface $Response): MessageInterface
     {
-        $params = $Request->getParsedBody();
-        $menu = [];
+        $params = self::getParsedBodyData($Request);
 
-        $requiredFields = [
-            'id'
-        ];
-
-        foreach ($requiredFields as $field) {
-            if (empty($params[$field])) {
-                return Handler::getGenericErrorResponse('Field "' . $field . '" is missing.');
-            }
-
-            $menu[$field] = Orthos::clear($params[$field]);
+        if (empty($params['id'])) {
+            return Handler::getGenericErrorResponse('Field "id" is missing.');
         }
 
+        $menuId = (int)Orthos::clear($params['id']);
+
         try {
-            $Menu = MenuHandler::getMenu($menu['id']);
+            $Menu = MenuHandler::getMenu($menuId);
         } catch (Exception $Exception) {
             return Handler::getGenericExceptionResponse($Exception);
         }
@@ -208,51 +173,34 @@ class Provider implements ProviderInterface
      */
     public function update(RequestInterface $Request, ResponseInterface $Response): MessageInterface
     {
-        $params = $Request->getParsedBody();
-        $menu = [];
+        $params = self::getParsedBodyData($Request);
 
-        $requiredFields = [
-            'id'
-        ];
-
-        foreach ($requiredFields as $field) {
-            if (empty($params[$field])) {
-                return Handler::getGenericErrorResponse('Field "' . $field . '" is missing.');
-            }
-
-            $menu[$field] = Orthos::clear($params[$field]);
+        if (empty($params['id'])) {
+            return Handler::getGenericErrorResponse('Field "id" is missing.');
         }
 
-        $optionalFields = [
-            'title',
-            'workingTitle',
-            'data'
+        $menu = [
+            'id' => (int)Orthos::clear($params['id'])
         ];
 
-        foreach ($optionalFields as $field) {
-            if (empty($params[$field])) {
-                continue;
-            }
+        $title = self::getLocaleMap($params['title'] ?? null);
 
-            $value = $params[$field];
+        if ($title !== null) {
+            $menu['title'] = $title;
+        }
 
-            switch ($field) {
-                case 'data':
-                    break;
+        $workingTitle = self::getLocaleMap($params['workingTitle'] ?? null);
 
-                default:
-                    if (is_array($params[$field])) {
-                        $value = Orthos::clearArray($params[$field]);
-                    } else {
-                        $value = Orthos::clear($params[$field]);
-                    }
-            }
+        if ($workingTitle !== null) {
+            $menu['workingTitle'] = $workingTitle;
+        }
 
-            $menu[$field] = $value;
+        if (isset($params['data']) && is_array($params['data'])) {
+            $menu['data'] = $params['data'];
         }
 
         try {
-            $Menu = MenuHandler::getMenu((int)$menu['id']);
+            $Menu = MenuHandler::getMenu($menu['id']);
 
             if (!empty($menu['title'])) {
                 $Menu->setTitle($menu['title']);
@@ -288,30 +236,66 @@ class Provider implements ProviderInterface
      */
     public function delete(RequestInterface $Request, ResponseInterface $Response): MessageInterface
     {
-        $params = $Request->getParsedBody();
-        $menu = [];
+        $params = self::getParsedBodyData($Request);
 
-        $requiredFields = [
-            'id'
-        ];
-
-        foreach ($requiredFields as $field) {
-            if (empty($params[$field])) {
-                return Handler::getGenericErrorResponse('Field "' . $field . '" is missing.');
-            }
-
-            $menu[$field] = Orthos::clear($params[$field]);
+        if (empty($params['id'])) {
+            return Handler::getGenericErrorResponse('Field "id" is missing.');
         }
 
+        $menuId = (int)Orthos::clear($params['id']);
+
         try {
-            MenuFactory::deleteMenu((int)$menu['id']);
+            MenuFactory::deleteMenu($menuId);
         } catch (Exception $Exception) {
             return Handler::getGenericExceptionResponse($Exception);
         }
 
         return Handler::getGenericSuccessResponse(
-            'Menu #' . $menu['id'] . ' successfully deleted.'
+            'Menu #' . $menuId . ' successfully deleted.'
         );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function getParsedBodyData(RequestInterface $Request): array
+    {
+        $params = $Request->getParsedBody();
+
+        if (is_array($params)) {
+            return $params;
+        }
+
+        if (is_object($params)) {
+            return get_object_vars($params);
+        }
+
+        return [];
+    }
+
+    /**
+     * @return array<string, string>|null
+     */
+    private static function getLocaleMap(mixed $value): ?array
+    {
+        if (!is_array($value)) {
+            return null;
+        }
+
+        $value = Orthos::clearArray($value);
+        $result = [];
+
+        foreach ($value as $language => $text) {
+            if (is_string($language) && is_string($text)) {
+                $result[$language] = $text;
+            }
+        }
+
+        if (empty($result)) {
+            return null;
+        }
+
+        return $result;
     }
 
     /**
@@ -342,7 +326,7 @@ class Provider implements ProviderInterface
      * @param QUI\Locale|null $Locale (optional)
      * @return string
      */
-    public function getTitle(QUI\Locale $Locale = null): string
+    public function getTitle(?QUI\Locale $Locale = null): string
     {
         if (empty($Locale)) {
             $Locale = QUI::getLocale();

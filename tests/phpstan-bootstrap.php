@@ -17,3 +17,4 @@ require_once __DIR__ . '/stubs/QUI/AI/MCP/ProviderInterface.php';
 require_once __DIR__ . '/stubs/QUI/AI/MCP/Server.php';
 require_once __DIR__ . '/stubs/QUI/AI/MCP/ToolHelper.php';
 require_once __DIR__ . '/stubs/QUI/MCP/ToolInterface.php';
+require_once __DIR__ . '/stubs/QUI/CoreRest/Handler.php';

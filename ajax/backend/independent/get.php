@@ -48,11 +48,7 @@ QUI::getAjax()->registerFunction(
     function ($id) {
         $Menu = QUI\Menu\Independent\Handler::getMenu((int)$id);
         $result = $Menu->toArray();
-        $data = $result['data'] ?? [];
-
-        if (is_array($data)) {
-            $result['data'] = packageQuiqqerMenuParseChildren($data);
-        }
+        $result['data'] = packageQuiqqerMenuParseChildren($result['data']);
 
         return $result;
     },
