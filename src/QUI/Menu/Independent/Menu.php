@@ -325,12 +325,23 @@ class Menu
         }
 
         if (isset($data['children'])) {
-            $data = $this->checkData($data);
+            $data = $this->sanitizeData($data);
 
             if ($data) {
                 $this->data = $data;
             }
         }
+    }
+
+    /**
+     * Checks a data array and filters not allowed entries.
+     *
+     * @param array $data
+     * @return array|null
+     */
+    public function sanitizeData(array $data): ?array
+    {
+        return $this->checkData($data);
     }
 
     /**
@@ -350,7 +361,7 @@ class Menu
                 $child = $this->checkMenuDataItem($item);
 
                 if ($child) {
-                    $result['children'][] = $this->checkMenuDataItem($item);
+                    $result['children'][] = $child;
                 }
             }
         }
@@ -374,7 +385,9 @@ class Menu
             $result['title'] = $item['title'];
         }
 
-        if (!isset($item['identifier'])) {
+        if (isset($item['identifier']) && is_string($item['identifier']) && $item['identifier'] !== '') {
+            $result['identifier'] = $item['identifier'];
+        } else {
             $result['identifier'] = QUI\Utils\Uuid::get();
         }
 
@@ -400,12 +413,12 @@ class Menu
                 $child = $this->checkMenuDataItem($item);
 
                 if ($child) {
-                    $result['children'][] = $this->checkMenuDataItem($item);
+                    $result['children'][] = $child;
                 }
             }
         }
 
-        if (empty($result) || !isset($result['title']) || !isset($result['type'])) {
+        if (!isset($result['title']) || !isset($result['type'])) {
             return null;
         }
 

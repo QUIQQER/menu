@@ -26,6 +26,7 @@
 
         <provider>
             <rest src="\QUI\Menu\Rest\Provider"/>
+            <mcp src="\QUI\Menu\MCP\Provider"/>
         </provider>
     </package>
 </quiqqer>
