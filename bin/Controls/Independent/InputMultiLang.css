@@ -1,0 +1,44 @@
+.quiqqer-menu-independent-inputmultilang {
+    padding: 0;
+}
+
+.quiqqer-menu-independent-inputmultilang-entry {
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+    display: flex;
+    min-height: 34px;
+    padding: 0;
+}
+
+.quiqqer-menu-independent-inputmultilang-entry:last-child {
+    border-bottom: 0;
+}
+
+.quiqqer-menu-independent-inputmultilang-entry-flag {
+    flex-shrink: 0;
+    margin-left: 10px;
+}
+
+.quiqqer-menu-independent-inputmultilang-entry-display {
+    flex-grow: 1;
+    line-height: 30px;
+    padding-left: 10px;
+}
+
+.quiqqer-menu-independent-inputmultilang-entry-display--fallback {
+    color: #999;
+    font-style: italic;
+}
+
+.quiqqer-menu-independent-inputmultilang-entry button {
+    align-items: center;
+    align-self: stretch;
+    border-radius: 0;
+    border-left: 1px solid rgba(147, 128, 108, 0.25);
+    box-shadow: none;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    width: 50px;
+}
