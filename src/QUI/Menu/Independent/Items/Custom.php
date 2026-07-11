@@ -3,6 +3,7 @@
 namespace QUI\Menu\Independent\Items;
 
 use QUI;
+use QUI\Locale;
 
 use function is_array;
 
@@ -15,17 +16,22 @@ class Custom extends AbstractMenuItem
     //region frontend item methods
 
     /**
+     * Multilingual: {"de": "...", "en": "..."};
+     * a plain string (old single-language format) is returned unchanged
+     * for every language (backward compatible).
+     *
+     * @param ?Locale $Locale
      * @return string
      */
-    public function getUrl(): string
+    public function getUrl(null | Locale $Locale = null): string
     {
         $data = $this->getCustomData();
 
-        if (is_array($data) && isset($data['url'])) {
-            return $data['url'];
+        if (!is_array($data) || !isset($data['url'])) {
+            return '';
         }
 
-        return '';
+        return $this->resolveLocalizedUrl($data['url'], $Locale);
     }
 
     /**
