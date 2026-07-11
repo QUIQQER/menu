@@ -5,6 +5,7 @@
 define('package/quiqqer/menu/bin/Controls/Independent/Items/Url', [
 
     'qui/QUI',
+    'QUIQQER',
     'qui/controls/Control',
     'Locale',
     'Mustache',
@@ -12,7 +13,7 @@ define('package/quiqqer/menu/bin/Controls/Independent/Items/Url', [
 
     'text!package/quiqqer/menu/bin/Controls/Independent/Items/Url.html'
 
-], function (QUI, QUIControl, QUILocale, Mustache, IndependentHandler, template) {
+], function (QUI, QUIQQER, QUIControl, QUILocale, Mustache, IndependentHandler, template) {
     "use strict";
 
     const lg = 'quiqqer/menu';
@@ -124,11 +125,13 @@ define('package/quiqqer/menu/bin/Controls/Independent/Items/Url', [
             });
 
             this.getElm().getElement('[name="icon"]').set('value', icon);
-            this.getElm().getElement('[name="url"]').set('value', data.url);
             this.getElm().getElement('[name="rel"]').set('value', data.rel);
             this.getElm().getElement('[name="menuType"]').set('value', data.menuType);
 
-            QUI.parse(this.getElm()).then(() => {
+            Promise.all([
+                QUI.parse(this.getElm()),
+                QUIQQER.getAvailableLanguages()
+            ]).then(([, languages]) => {
                 this.$Title = QUI.Controls.getById(
                     this.getElm().getElement('[name="title"]').get('data-quiid')
                 );
@@ -137,8 +140,13 @@ define('package/quiqqer/menu/bin/Controls/Independent/Items/Url', [
                     this.getElm().getElement('[name="name"]').get('data-quiid')
                 );
 
+                this.$Url = QUI.Controls.getById(
+                    this.getElm().querySelector('[name="url"]').getAttribute('data-quiid')
+                );
+
                 this.$Title.setData(title);
                 this.$Name.setData(data.name);
+                this.$Url.setData(this.$normalizeUrlData(data.url, languages));
 
                 if (this.$Title.isLoaded()) {
                     this.$Title.open();
@@ -156,8 +164,53 @@ define('package/quiqqer/menu/bin/Controls/Independent/Items/Url', [
                     });
                 }
 
+                if (this.$Url.isLoaded()) {
+                    this.$Url.open();
+                } else {
+                    this.$Url.addEvent('load', () => {
+                        this.$Url.open();
+                    });
+                }
+
                 this.fireEvent('load');
             });
+        },
+
+        /**
+         * Keep old single-language urls working:
+         * a plain string is applied to every language.
+         *
+         * @param {String|Object} url
+         * @param {Array} languages
+         * @returns {Object} - {lang: url}
+         */
+        $normalizeUrlData: function (url, languages) {
+            if (typeof url === 'object' && url !== null && !Array.isArray(url)) {
+                return url;
+            }
+
+            if (typeof url !== 'string' || url === '') {
+                return {};
+            }
+
+            let decoded = null;
+
+            try {
+                decoded = JSON.parse(url);
+            } catch (e) {
+            }
+
+            if (typeof decoded === 'object' && decoded !== null && !Array.isArray(decoded)) {
+                return decoded;
+            }
+
+            const result = {};
+
+            languages.forEach((lang) => {
+                result[lang] = url;
+            });
+
+            return result;
         },
 
         save: function () {
@@ -167,7 +220,7 @@ define('package/quiqqer/menu/bin/Controls/Independent/Items/Url', [
                 title: this.$Title.getValue(),
                 icon : Form.elements.icon.value,
                 data : {
-                    url     : Form.elements.url.value.trim(),
+                    url     : this.$Url.getValue(),
                     target  : Form.elements.target.value,
                     menuType: Form.elements.menuType.value,
                     status  : Form.elements.status.checked ? 1 : 0,
