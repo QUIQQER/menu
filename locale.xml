@@ -1262,6 +1262,10 @@
             <de><![CDATA[Menü Auswahl]]></de>
             <en><![CDATA[Select menu]]></en>
         </locale>
+        <locale name="quiqqer.menu.select.fallbackDefaultLang">
+            <de><![CDATA[wie Standardsprache ([menu])]]></de>
+            <en><![CDATA[same as default language ([menu])]]></en>
+        </locale>
 
         <!-- Tabs: settings -->
         <locale name="control.tabs.entries.isDisabled">

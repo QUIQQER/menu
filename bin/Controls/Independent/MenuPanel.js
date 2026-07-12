@@ -370,6 +370,59 @@ define('package/quiqqer/menu/bin/Controls/Independent/MenuPanel', [
                 }
             }
 
+            const submitAddItem = (Win) => {
+                const Content = Win.getContent();
+                const Form = Content.getElement('form');
+                const type = Form.elements.itemType.value;
+
+                if (!type) {
+                    return;
+                }
+
+                const Option = Form.getElement(
+                    '[value="' + CSS.escape(type) + '"]'
+                );
+
+                if (!Option) {
+                    return;
+                }
+
+                let itemAttributes = {
+                    text     : '',
+                    icon     : Option.get('data-icon'),
+                    itemTitle: '',
+                    itemType : Form.elements.itemType.value,
+                    itemIcon : '',
+                    events   : {
+                        click      : this.$openItem,
+                        contextMenu: this.$onContextMenu
+                    }
+                };
+
+                let Child;
+
+                if (where === 'bottom') {
+                    Child = new QUIMapItem(itemAttributes);
+                    Parent.appendChild(Child);
+
+                    if (typeof Parent === 'function') {
+                        Parent.open();
+                    }
+                } else {
+                    Child = new QUIMapItem(itemAttributes);
+                    Parent.appendChild(Child, where);
+                }
+
+                Win.close();
+
+                this.save().then(() => {
+                    Child.click();
+                    this.$ActiveMapItem = Child;
+
+                    return this.$refreshItemDisplay();
+                });
+            };
+
             new QUIConfirm({
                 icon     : 'fa fa-plus',
                 title    : QUILocale.get(lg, 'quiqqer.menu.independent.addItem.title'),
@@ -393,7 +446,9 @@ define('package/quiqqer/menu/bin/Controls/Independent/MenuPanel', [
                         );
 
                         IndependentHandler.getItemTypes().then((list) => {
-                            this.$createOptionList(list, Content);
+                            this.$createOptionList(list, Content, false, () => {
+                                Win.submit();
+                            });
 
                             return QUI.parse(Win.getContent());
                         }).then(function () {
@@ -401,51 +456,7 @@ define('package/quiqqer/menu/bin/Controls/Independent/MenuPanel', [
                         });
                     },
 
-                    onSubmit: (Win) => {
-                        const Content = Win.getContent();
-                        const Form = Content.getElement('form');
-
-                        let type = Form.elements.itemType.value;
-
-                        const Option = Form.getElement(
-                            '[value="' + CSS.escape(type) + '"]'
-                        );
-
-                        let itemAttributes = {
-                            text     : '',
-                            icon     : Option.get('data-icon'),
-                            itemTitle: '',
-                            itemType : Form.elements.itemType.value,
-                            itemIcon : '',
-                            events   : {
-                                click      : this.$openItem,
-                                contextMenu: this.$onContextMenu
-                            }
-                        };
-
-                        let Child;
-
-                        if (where === 'bottom') {
-                            Child = new QUIMapItem(itemAttributes);
-                            Parent.appendChild(Child);
-
-                            if (typeof Parent === 'function') {
-                                Parent.open();
-                            }
-                        } else {
-                            Child = new QUIMapItem(itemAttributes);
-                            Parent.appendChild(Child, where);
-                        }
-
-                        Win.close();
-
-                        this.save().then(() => {
-                            Child.click();
-                            this.$ActiveMapItem = Child;
-
-                            return this.$refreshItemDisplay();
-                        });
-                    }
+                    onSubmit: submitAddItem
                 }
             }).open();
         },
@@ -525,8 +536,9 @@ define('package/quiqqer/menu/bin/Controls/Independent/MenuPanel', [
          * @param list
          * @param Content
          * @param selected
+         * @param onDoubleClick
          */
-        $createOptionList: function(list, Content, selected = false) {
+        $createOptionList: function(list, Content, selected = false, onDoubleClick = null) {
             const OptionsList = Content.getElement('.qui-menuPanel-optionList'),
                 selectedItem = selected ? selected : 'QUI\\Menu\\Independent\\Items\\Site';
 
@@ -557,6 +569,26 @@ define('package/quiqqer/menu/bin/Controls/Independent/MenuPanel', [
 
                 Label.inject(OptionsList);
                 Label.getElement('input').addEventListener('change', toggleSelected);
+
+                if (typeof onDoubleClick === 'function') {
+                    Label.addEventListener('dblclick', () => {
+                        const Input = Label.querySelector('input');
+
+                        if (!Input) {
+                            return;
+                        }
+
+                        Input.checked = true;
+                        Label.classList.add('checked');
+                        OptionsList.getElements('label').forEach(function(CurrentLabel) {
+                            if (CurrentLabel !== Label) {
+                                CurrentLabel.classList.remove('checked');
+                            }
+                        });
+
+                        onDoubleClick();
+                    });
+                }
             }
         },
 
