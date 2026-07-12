@@ -247,6 +247,7 @@ define('package/quiqqer/menu/bin/MegaMenu', [
 
                 if (TargetElm) {
                     self.$scrollToElement(TargetElm);
+                    return;
                 }
 
                 window.location = Link.get('href');
