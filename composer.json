@@ -2,24 +2,26 @@
     "name": "quiqqer/menu",
     "type": "quiqqer-module",
     "description": "The Plugin menu provides various menu controls.",
+    "homepage": "https://www.quiqqer.com",
     "license": [
-        "GPL-3.0+",
+        "GPL-3.0-or-later",
         "PCSG QL-1.0"
     ],
     "authors": [
         {
-            "name": "Henning Leutz",
-            "email": "leutz@pcsg.de",
-            "homepage": "https://www.pcsg.de",
-            "role": "Developer"
+            "name": "PCSG - Computer & Internet Service OHG",
+            "email": "info@quiqqer.com",
+            "homepage": "https://www.quiqqer.com",
+            "role": "Maintainer"
         }
     ],
     "support": {
-        "email": "support@pcsg.de",
-        "url": "https://www.pcsg.de"
+        "email": "info@quiqqer.com",
+        "issues": "https://dev.quiqqer.com/quiqqer/menu/-/issues",
+        "source": "https://dev.quiqqer.com/quiqqer/menu"
     },
     "require": {
-        "php": "^8.1",
+        "php": "^8.2",
         "quiqqer/core": "^2"
     },
     "autoload": {
