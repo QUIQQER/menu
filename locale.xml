@@ -30,6 +30,18 @@
             <de><![CDATA[Menü Art]]></de>
             <en><![CDATA[Menu type]]></en>
         </locale>
+        <locale name="menu.settings.type.desc">
+            <de><![CDATA[Legt den Standard für die Dropdown-Untermenüs im MegaMenu fest. Die Auswahl betrifft die Unterpunkte des jeweiligen Menüeintrags; Icons, Bilder und Beschreibungen werden je nach Menü-Art erst für weitere Unterseiten angezeigt.]]></de>
+            <en><![CDATA[Defines the default for the dropdown submenus in the MegaMenu. The selection affects the child entries of each menu item; icons, images and descriptions are displayed for further subpages depending on the menu type.]]></en>
+        </locale>
+        <locale name="menu.settings.type.site.desc">
+            <de><![CDATA[Überschreibt die Projekt-Einstellung für das Dropdown-Untermenü unter dieser Seite. Mit "Projektstandard verwenden" wird die Projekt-Einstellung genutzt.]]></de>
+            <en><![CDATA[Overrides the project setting for the dropdown submenu below this page. "Use project default" uses the project setting.]]></en>
+        </locale>
+        <locale name="menu.settings.type.inherit">
+            <de><![CDATA[Projektstandard verwenden]]></de>
+            <en><![CDATA[Use project default]]></en>
+        </locale>
         <locale name="menu.settings.Standard">
             <de><![CDATA[MegaMenu - mit Unterseiten]]></de>
             <en><![CDATA[MegaMenu - with sub pages]]></en>
