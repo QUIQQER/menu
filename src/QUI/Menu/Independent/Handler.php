@@ -4,6 +4,7 @@ namespace QUI\Menu\Independent;
 
 use QUI;
 use QUI\Menu\Independent\Items\AbstractMenuItem;
+use QUI\Utils\Doctrine;
 
 use function is_scalar;
 use function md5;
@@ -68,16 +69,17 @@ class Handler
      */
     public static function getMenuData(int $menuId): array
     {
-        $data = QUI::getDataBase()->fetch([
-            'from' => self::table(),
-            'where' => [
-                'id' => $menuId
-            ],
-            'limit' => 1
-        ]);
+        $result = QUI::getQueryBuilder()
+            ->select('*')
+            ->from(Doctrine::quoteIdentifier(self::table()))
+            ->where(Doctrine::quoteIdentifier('id') . ' = :id')
+            ->setParameter('id', $menuId)
+            ->setMaxResults(1)
+            ->executeQuery()
+            ->fetchAssociative();
 
-        if (isset($data[0])) {
-            return $data[0];
+        if (is_array($result)) {
+            return $result;
         }
 
         throw new QUI\Exception(
@@ -95,9 +97,11 @@ class Handler
      */
     public static function getList(): array
     {
-        $data = QUI::getDataBase()->fetch([
-            'from' => self::table()
-        ]);
+        $data = QUI::getQueryBuilder()
+            ->select('*')
+            ->from(Doctrine::quoteIdentifier(self::table()))
+            ->executeQuery()
+            ->fetchAllAssociative();
 
         $result = [];
 
