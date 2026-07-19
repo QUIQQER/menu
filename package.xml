@@ -11,17 +11,17 @@
         <image src="URL_OPT_DIR/quiqqer/menu/bin/images/Logo.jpg"/>
 
         <support>
-            <email><![CDATA[support@pcsg.de]]></email>
+            <email><![CDATA[info@quiqqer.com]]></email>
             <forum><![CDATA[https://community.quiqqer.com]]></forum>
-            <source><![CDATA[https://dev.quiqqer.com/quiqqer/package-menu]]></source>
-            <issues><![CDATA[https://dev.quiqqer.com/quiqqer/package-menu/issues]]></issues>
-            <wiki><![CDATA[https://dev.quiqqer.com/quiqqer/package-menu/wikis/home]]></wiki>
+            <source><![CDATA[https://dev.quiqqer.com/quiqqer/menu]]></source>
+            <issues><![CDATA[https://dev.quiqqer.com/quiqqer/menu/-/issues]]></issues>
+            <wiki><![CDATA[https://dev.quiqqer.com/quiqqer/menu/-/wikis/home]]></wiki>
         </support>
 
         <copyright>
             <name><![CDATA[PCSG - Computer & Internet Service OHG]]></name>
             <license><![CDATA[PCSG QL-1.0]]></license>
-            <license><![CDATA[GPL-3.0+]]></license>
+            <license><![CDATA[GPL-3.0-or-later]]></license>
         </copyright>
 
         <provider>
