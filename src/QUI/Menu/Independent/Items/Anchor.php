@@ -46,7 +46,11 @@ class Anchor extends AbstractMenuItem
         }
 
         if (is_array($anchor) && isset($anchor[$current])) {
-            $url .= '#' . trim($anchor[$current], '#');
+            $anchorValue = trim($anchor[$current], '#');
+
+            if ($anchorValue !== '') {
+                $url .= '#' . $anchorValue;
+            }
         }
 
         return $url;

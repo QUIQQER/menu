@@ -5,6 +5,7 @@ namespace QUI\Menu\Independent;
 use Exception;
 use QUI;
 use QUI\Menu\Independent\Items\AbstractMenuItem;
+use QUI\Utils\Doctrine;
 
 use function array_filter;
 use function array_values;
@@ -263,7 +264,7 @@ class Menu
     {
         QUI\Permissions\Permission::checkPermission('quiqqer.menu.edit', $PermissionUser);
 
-        QUI::getDataBase()->update(Handler::table(), [
+        QUI::getDataBaseConnection()->update(Doctrine::quoteIdentifier(Handler::table()), [
             'title' => json_encode($this->title),
             'workingTitle' => json_encode($this->workingTitle),
             'data' => json_encode($this->data)

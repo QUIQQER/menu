@@ -22,7 +22,12 @@
                         <text>
                             <locale group="quiqqer/menu" var="menu.settings.type"/>
                         </text>
-                        <option value=""></option>
+                        <description>
+                            <locale group="quiqqer/menu" var="menu.settings.type.site.desc"/>
+                        </description>
+                        <option value="">
+                            <locale group="quiqqer/menu" var="menu.settings.type.inherit"/>
+                        </option>
                         <option value="Standard">
                             <locale group="quiqqer/menu" var="menu.settings.Standard"/>
                         </option>

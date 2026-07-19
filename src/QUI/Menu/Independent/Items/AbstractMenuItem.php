@@ -10,6 +10,7 @@ use function array_values;
 use function is_array;
 use function is_string;
 use function json_decode;
+use function trim;
 
 /**
  * Base class for menu items
@@ -139,6 +140,52 @@ abstract class AbstractMenuItem
      */
     public function getUrl(): string
     {
+        return '';
+    }
+
+    /**
+     * Resolve a multilingual url value ({"de": "...", "en": "..."}) for the locale,
+     * with a fallback to the first non-empty entry;
+     * a plain string (old single-language format) is returned unchanged
+     * for every language (backward compatible).
+     *
+     * @param mixed $url
+     * @param ?Locale $Locale
+     * @return string
+     */
+    protected function resolveLocalizedUrl(mixed $url, null | Locale $Locale = null): string
+    {
+        if (is_string($url)) {
+            $decoded = json_decode($url, true);
+
+            if (!is_array($decoded)) {
+                return trim($url);
+            }
+
+            $url = $decoded;
+        }
+
+        if (!is_array($url)) {
+            return '';
+        }
+
+        if ($Locale === null) {
+            $Locale = QUI::getLocale();
+        }
+
+        $current = $Locale->getCurrent();
+
+        if (isset($url[$current]) && is_string($url[$current]) && trim($url[$current]) !== '') {
+            return trim($url[$current]);
+        }
+
+        // fallback, so entries without a translated url keep working
+        foreach ($url as $langUrl) {
+            if (is_string($langUrl) && trim($langUrl) !== '') {
+                return trim($langUrl);
+            }
+        }
+
         return '';
     }
 

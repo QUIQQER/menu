@@ -2,10 +2,10 @@
 <database>
     <global>
         <table name="menus">
-            <field type="BIGINT(10) NOT NULL AUTO_INCREMENT PRIMARY KEY">id</field>
-            <field type="TEXT DEFAULT NULL">title</field>
-            <field type="TEXT DEFAULT NULL">workingTitle</field>
-            <field type="TEXT NULL">data</field>
+            <field type="bigint" autoincrement="true" primary="true">id</field>
+            <field type="text" nullable="true" default="null">title</field>
+            <field type="text" nullable="true" default="null">workingTitle</field>
+            <field type="text" nullable="true" default="null">data</field>
         </table>
     </global>
 </database>

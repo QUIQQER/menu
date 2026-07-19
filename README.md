@@ -1,57 +1,54 @@
 ![QUIQQER Menu](bin/images/Readme.jpg)
 
+# QUIQQER Menu
 
-QUIQQER Menu
-========
+`quiqqer/menu` provides menu controls for QUIQQER projects and templates.
 
-The Plugin menu provides various menu controls.
+## Features
 
-Package name:
+- Mega menu variants for multi-level navigation
+- Elastic and slide-out menus for mobile-friendly navigation
+- Independent menus that can be managed separately from the site tree
+- Navigation controls such as tabs, one-page navigation, sidebar menus, and URL lists
+- REST and MCP endpoints for independent menu management
 
-    quiqqer/menu
+## Installation
 
+Install the package in your QUIQQER environment:
 
-Features
---------
+```bash
+composer require quiqqer/menu
+```
 
-- Mega Menu (mobile-fähig & Wechsel auf SlideOut)
-    - besitzt verschiedene Anzeigearten
-        - Mega Menu - mit Unterseiten
-        - Mega Menu - Unterseiten mit Icons
-        - Mega Menu - Unterseiten mit Icons, Bilder und Beschreibung
-        - Mega Menu - Grosse Seitenbilder
-        - Mega Menu - Grosse Seitenbilder
-- Elastic Menu (mobile-fähig)
-- SlideOut Menu (mobile-fähig)
-- 2 Arten von Mobile-Menü:
-  1. Slideout - standard mobiles Menü
-  2. Slideout Advanced - Erweitertes Slideout Menü.
+## Usage
 
+The package provides multiple frontend controls and menu renderers for:
 
-Installation
-------------
+- project navigation based on the site tree
+- independent menus with custom entries
+- mobile navigation with slide-out variants
+- backend management for independent menus
 
-Der Paketname ist: quiqqer/menu
+Depending on the integration point, configure the provided controls,
+menu templates, or independent menu administration in the QUIQQER
+backend.
 
+## Technical Notes
 
-Contribution
-----------
+- Requires PHP `^8.2`
+- Requires `quiqqer/core ^2`
+- Uses package-local development tools from `./tools/`
 
-- Issue Tracker: https://dev.quiqqer.com/quiqqer/package-menu/issues
-- Source Code: https://dev.quiqqer.com/quiqqer/package-menu
-- Wiki: https://dev.quiqqer.com/quiqqer/package-menu/-/wikis/home
+## Support
 
+- Issues: https://dev.quiqqer.com/quiqqer/menu/-/issues
+- Source: https://dev.quiqqer.com/quiqqer/menu
+- Community: https://community.quiqqer.com
+- Email: info@quiqqer.com
 
-Support
--------
+## License
 
-Falls Sie Fehler gefunden, Wünsche oder Verbesserungsvorschläge haben,
-können Sie uns gern per Mail an support@pcsg.de darüber informieren.  
-Wir werden versuchen auf Ihre Wünsche einzugehen bzw. diese an die zuständigen Entwickler
-des Projektes weiterleiten.
+This package is dual-licensed under:
 
-
-License
--------
-
-MIT
+- `GPL-3.0-or-later`
+- `PCSG QL-1.0`

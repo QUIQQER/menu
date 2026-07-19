@@ -5,6 +5,7 @@ namespace QUI\Menu\Independent;
 use Exception;
 use QUI;
 use QUI\Interfaces\Users\User;
+use QUI\Utils\Doctrine;
 
 /**
  * Menu factory
@@ -19,13 +20,14 @@ class Factory
     {
         QUI\Permissions\Permission::checkPermission('quiqqer.menu.create', $PermissionUser);
 
-        QUI::getDataBase()->insert(Handler::table(), [
+        $Connection = QUI::getDataBaseConnection();
+        $Connection->insert(Doctrine::quoteIdentifier(Handler::table()), [
             'title' => '',
             'workingTitle' => '',
             'data' => ''
         ]);
 
-        $lastId = (int)QUI::getPDO()->lastInsertId();
+        $lastId = (int)$Connection->lastInsertId();
         $Menu = Handler::getMenu($lastId);
 
         try {
@@ -47,7 +49,7 @@ class Factory
     {
         QUI\Permissions\Permission::checkPermission('quiqqer.menu.delete', $PermissionUser);
 
-        QUI::getDataBase()->delete(Handler::table(), [
+        QUI::getDataBaseConnection()->delete(Doctrine::quoteIdentifier(Handler::table()), [
             'id' => $menuId
         ]);
 

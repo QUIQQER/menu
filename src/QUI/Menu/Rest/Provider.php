@@ -12,6 +12,7 @@ use QUI\Menu\Independent\Factory as MenuFactory;
 use QUI\Menu\Independent\Handler as MenuHandler;
 use QUI\REST\ProviderInterface;
 use QUI\REST\Server;
+use QUI\Utils\Doctrine;
 use QUI\Utils\Security\Orthos;
 use Slim\Routing\RouteCollectorProxy;
 
@@ -101,8 +102,8 @@ class Provider implements ProviderInterface
             $newMenuId = $Menu->getId();
 
             if ($menuId) {
-                QUI::getDataBase()->update(
-                    MenuHandler::table(),
+                QUI::getDataBaseConnection()->update(
+                    Doctrine::quoteIdentifier(MenuHandler::table()),
                     [
                         'id' => $menuId,
                     ],
