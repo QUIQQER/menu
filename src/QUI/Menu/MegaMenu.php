@@ -166,6 +166,13 @@ class MegaMenu extends AbstractMenu
             $this->Mobile->setAttribute('data-qui-options-menu-button', 0);
             $this->Mobile->setAttribute('data-qui-options-touch', 0);
             $this->Mobile->setAttribute('data-qui-options-buttonids', 'mobileMenu');
+
+            // allow other packages (e.g. templates) to inject html into the
+            // mobile slide-out menu without knowing its concrete structure
+            QUI::getEvents()->fireEvent(
+                'quiqqerMenuMobileMenuCreate',
+                [$this->Mobile, $this->getSite()]
+            );
         }
 
         $this->setAttribute('data-qui-options-enablemobile', $this->getAttribute('enableMobile') ? 1 : 0);
