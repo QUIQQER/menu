@@ -58,6 +58,22 @@
     z-index: 100;
 }
 
+/**
+ * Areas for html injected via prependHTML()/appendHTML()
+ * (horizontal spacing is inherited from .page-navigation padding).
+ */
+.page-menu-appendArea {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.page-menu-prependArea {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
 .page-navigation ul {
     margin-left: 1.5rem;
     padding-left: 0;
@@ -69,7 +85,7 @@
     width: 100%;
 }
 
-.page-navigation a {
+.page-navigation a:not(.btn) {
     align-items: flex-start;
     color: #fff;
     display: flex;

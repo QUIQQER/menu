@@ -1,6 +1,8 @@
 <nav class="page-menu" data-qui="{$jsControl}" data-slideOut="mobileMenu-SlideOut" style="display: none;" data-qui-options-control="{$slideOutControl}" data-qui-options-collapse-mobile-submenu={$collapseMobileSubmenu} data-qui-options-menu-button="0">
 
     <div class="page-navigation {if !$showHomeLink}page-navigation__noHomeLink{/if}">
+        {if $prepend}<div class="page-menu-prependArea">{$prepend}</div>{/if}
+
         {if $showHomeLink}
         <a href="{url site=$Project->firstChild()}" class="page-navigation-home">
             <span class="fa fa-home"></span>
@@ -14,5 +16,7 @@
                  collapseMobileSubmenu=$collapseMobileSubmenu
                  showLevel=$showLevel
         }
+
+        {if $append}<div class="page-menu-appendArea">{$append}</div>{/if}
     </div>
 </nav>
