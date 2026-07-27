@@ -37,6 +37,21 @@
     z-index: 100;
 }
 
+/**
+ * Areas for html injected via prependHTML()/appendHTML().
+ * They pick up the same horizontal inset as the menu rows. The appended
+ * area needs no top border, because the last nav element already provides
+ * a bottom border.
+ */
+.quiqqer-slideoutAdvanced-appendArea {
+    padding: var(--quiqqer-slideOutAdvanced-padding-block, 1rem) var(--quiqqer-slideOutAdvanced-padding-inline, 2rem);
+}
+
+.quiqqer-slideoutAdvanced-prependArea {
+    padding: var(--quiqqer-slideOutAdvanced-padding-block, 1rem) var(--quiqqer-slideOutAdvanced-padding-inline, 2rem);
+    border-bottom: 1px solid var(--quiqqer-slideoutAdvanced-border-color, rgba(255, 255, 255, 0.15));
+}
+
 .page-navigation ul {
     padding-left: 0;
 }

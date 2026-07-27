@@ -18,6 +18,16 @@ use QUI;
 class SlideOut extends QUI\Control
 {
     /**
+     * @var string
+     */
+    protected string $append = '';
+
+    /**
+     * @var string
+     */
+    protected string $prepend = '';
+
+    /**
      * @param array<string, mixed> $attributes
      */
     public function __construct(array $attributes = [])
@@ -31,6 +41,28 @@ class SlideOut extends QUI\Control
         ]);
 
         parent::__construct($attributes);
+    }
+
+    /**
+     * append html to the menu
+     * adds a html after the menu
+     *
+     * @param string $html
+     */
+    public function appendHTML(string $html): void
+    {
+        $this->append = $html;
+    }
+
+    /**
+     * prepend html to the menu
+     * adds a html before the menu
+     *
+     * @param string $html
+     */
+    public function prependHTML(string $html): void
+    {
+        $this->prepend = $html;
     }
 
     /**
@@ -49,7 +81,9 @@ class SlideOut extends QUI\Control
             'Project' => $this->getProject(),
             'jsControl' => 'package/quiqqer/menu/bin/SlideOutLazy',
             'slideOutControl' => 'package/quiqqer/menu/bin/SlideOut',
-            'showHomeLink' => $this->getAttribute('showHomeLink')
+            'showHomeLink' => $this->getAttribute('showHomeLink'),
+            'prepend' => $this->prepend,
+            'append' => $this->append
         ];
 
         if ($this->getAttribute('menuId')) {

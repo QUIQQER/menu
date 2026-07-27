@@ -19,6 +19,16 @@ use function dirname;
 class SlideOutAdvanced extends QUI\Control
 {
     /**
+     * @var string
+     */
+    protected string $append = '';
+
+    /**
+     * @var string
+     */
+    protected string $prepend = '';
+
+    /**
      * @param array<string, mixed> $attributes
      */
     public function __construct(array $attributes = [])
@@ -38,6 +48,28 @@ class SlideOutAdvanced extends QUI\Control
     }
 
     /**
+     * append html to the menu
+     * adds a html after the menu
+     *
+     * @param string $html
+     */
+    public function appendHTML(string $html): void
+    {
+        $this->append = $html;
+    }
+
+    /**
+     * prepend html to the menu
+     * adds a html before the menu
+     *
+     * @param string $html
+     */
+    public function prependHTML(string $html): void
+    {
+        $this->prepend = $html;
+    }
+
+    /**
      * @return string
      * @throws QUI\Exception
      */
@@ -51,7 +83,9 @@ class SlideOutAdvanced extends QUI\Control
             'jsControl' => 'package/quiqqer/menu/bin/SlideOutLazy',
             'slideOutControl' => 'package/quiqqer/menu/bin/SlideoutAdvanced',
             'showShortDesc' => $this->getAttribute('showShortDesc'),
-            'showHomeLink' => $this->getAttribute('showHomeLink')
+            'showHomeLink' => $this->getAttribute('showHomeLink'),
+            'prepend' => $this->prepend,
+            'append' => $this->append
         ];
 
         if ($this->getAttribute('menuId')) {

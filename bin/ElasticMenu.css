@@ -91,7 +91,7 @@
     width: 100%;
 }
 
-.page-navigation a {
+.page-navigation a:not(.btn) {
     clear: both;
     color: #fff;
     float: left;
