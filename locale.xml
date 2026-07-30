@@ -1019,6 +1019,14 @@
             <de><![CDATA[Menüeintrag löschen]]></de>
             <en><![CDATA[Delete menu entry]]></en>
         </locale>
+        <locale name="context.menu.activate">
+            <de><![CDATA[Aktivieren]]></de>
+            <en><![CDATA[Activate]]></en>
+        </locale>
+        <locale name="context.menu.deactivate">
+            <de><![CDATA[Deaktivieren]]></de>
+            <en><![CDATA[Deactivate]]></en>
+        </locale>
         <locale name="tpl.icon">
             <de><![CDATA[Icon]]></de>
             <en><![CDATA[Icon]]></en>

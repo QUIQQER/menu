@@ -40,6 +40,7 @@ define('package/quiqqer/menu/bin/Controls/Independent/MenuPanel', [
             '$onInject',
             '$openItem',
             '$onContextMenu',
+            '$toggleItemStatus',
             '$startDeSelect',
             '$openMenuSettings',
             'addItem',
@@ -805,6 +806,44 @@ define('package/quiqqer/menu/bin/Controls/Independent/MenuPanel', [
         },
 
         /**
+         * Toggle the active status of a sitemap item and save immediately
+         *
+         * @param Item
+         */
+        $toggleItemStatus: function (Item) {
+            let data = Item.getAttribute('itemData');
+
+            if (typeof data !== 'object' || data === null) {
+                data = {};
+            }
+
+            const newStatus = (typeof data.status !== 'undefined' && data.status === 0) ? 1 : 0;
+            data.status = newStatus;
+
+            Item.setAttribute('itemData', data);
+
+            if (newStatus === 0) {
+                Item.deactivate();
+            } else {
+                Item.activate();
+            }
+
+            // if the item is currently open in the form, reload it so the
+            // status checkbox stays in sync and does not overwrite the new
+            // status on the next unload
+            if (this.$ActiveMapItem && this.$ActiveMapItem === Item) {
+                this.$ActiveItem = null;
+                this.$openItem(Item).then(() => {
+                    return this.save();
+                });
+
+                return;
+            }
+
+            this.save();
+        },
+
+        /**
          * Context menu für a sitemap item
          *
          * @param Item
@@ -862,6 +901,19 @@ define('package/quiqqer/menu/bin/Controls/Independent/MenuPanel', [
                 events: {
                     click: () => {
                         this.changeItemType(Item);
+                    }
+                }
+            }));
+
+            const itemData = Item.getAttribute('itemData');
+            const isActive = !itemData || typeof itemData.status === 'undefined' || itemData.status !== 0;
+
+            Menu.appendChild(new QUIContextMenuItem({
+                icon  : isActive ? 'fa fa-toggle-off' : 'fa fa-toggle-on',
+                text  : QUILocale.get(lg, isActive ? 'context.menu.deactivate' : 'context.menu.activate'),
+                events: {
+                    click: () => {
+                        this.$toggleItemStatus(Item);
                     }
                 }
             }));
