@@ -131,6 +131,9 @@ class MegaMenu extends AbstractMenu
             $showMenuDelay = intval($this->getAttribute('showMenuDelay'));
         }
 
+        $this->setAttribute('data-qui-options-enablemobile', $this->getAttribute('enableMobile') ? 1 : 0);
+        $this->setAttribute('data-qui-options-showmenuafter', $showMenuDelay);
+
         try {
             $cacheResult = QUI\Cache\Manager::get($cache);
 
@@ -174,9 +177,6 @@ class MegaMenu extends AbstractMenu
                 [$this->Mobile, $this->getSite()]
             );
         }
-
-        $this->setAttribute('data-qui-options-enablemobile', $this->getAttribute('enableMobile') ? 1 : 0);
-        $this->setAttribute('data-qui-options-showmenuafter', $showMenuDelay);
 
         $breakPoint = intval($this->getProject()->getConfig('mobileMenu.settings.breakPoint'));
 
