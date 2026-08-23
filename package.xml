@@ -8,6 +8,22 @@
             <locale group="quiqqer/menu" var="package.description"/>
         </description>
 
+        <capabilities schemaVersion="1">
+            <capability id="navigation.website-menus">
+                <title>Website menus</title>
+                <description>
+                    Renders responsive website navigation with mega, dropdown, sidebar, slide-out, tab, URL-list, one-page, and submenu variants.
+                </description>
+            </capability>
+
+            <capability id="navigation.independent-menu-management">
+                <title>Independent menu management</title>
+                <description>
+                    Creates and manages multilingual hierarchical menus independently of the site tree through the backend, REST API, and MCP tools.
+                </description>
+            </capability>
+        </capabilities>
+
         <image src="URL_OPT_DIR/quiqqer/menu/bin/images/Logo.jpg"/>
 
         <support>
