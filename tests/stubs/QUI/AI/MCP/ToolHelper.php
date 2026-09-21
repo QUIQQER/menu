@@ -9,7 +9,10 @@ if (!class_exists(ToolHelper::class)) {
     {
         public static function parseExceptionToResult(mixed $e): CallToolResult
         {
-            return new CallToolResult();
+            $Result = new CallToolResult();
+            $Result->isError = true;
+            $Result->message = $e->getMessage();
+            return $Result;
         }
     }
 }

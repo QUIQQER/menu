@@ -6,7 +6,10 @@
 
 namespace QUI\Menu\MCP;
 
+use Mcp\Schema\Result\CallToolResult;
+use QUI;
 use QUI\AI\MCP\Server;
+use QUI\AI\MCP\ToolHelper;
 use QUI\Exception;
 use QUI\MCP\ToolInterface;
 use QUI\Menu\Independent\Handler;
@@ -15,8 +18,11 @@ use QUI\Menu\Independent\Items\Anchor;
 use QUI\Menu\Independent\Items\Custom;
 use QUI\Menu\Independent\Items\Site;
 use QUI\Menu\Independent\Items\Url;
+use QUI\Menu\Independent\LocalizedValue;
 use QUI\Menu\Independent\Menu;
 use QUI\Permissions\Permission;
+use QUI\Utils\Doctrine;
+use Throwable;
 
 use function array_key_exists;
 use function array_map;
@@ -179,49 +185,66 @@ abstract class AbstractTool implements ToolInterface
      *
      * @throws Exception
      */
-    protected static function normalizeInputItem(array $item): array
+    protected static function normalizeInputItem(array $item, string $path = 'item', int $depth = 0): array
     {
-        if (!isset($item['type']) || !is_string($item['type'])) {
-            throw new Exception('Menu item type is required.', 400);
+        if ($depth > 64) {
+            throw new Exception($path . ': menu nesting exceeds 64 levels.', 400);
         }
 
-        if (!in_array($item['type'], Handler::getItemList(), true)) {
-            throw new Exception('Unsupported menu item type.', 400, ['type' => $item['type']]);
+        self::validateKeys($item, ['type', 'title', 'identifier', 'icon', 'data', 'children'], $path);
+
+        if (!isset($item['type']) || !in_array($item['type'], Handler::getItemList(), true)) {
+            throw new Exception($path . '.type: unsupported menu item type.', 400);
         }
 
-        if (!isset($item['title']) || !is_array($item['title'])) {
-            throw new Exception('Menu item title must be a localized object.', 400);
+        $item['title'] = LocalizedValue::encode($item['title'] ?? null, $path . '.title');
+
+        if (array_key_exists('identifier', $item)) {
+            if (!is_string($item['identifier']) || $item['identifier'] === '') {
+                throw new Exception($path . '.identifier: expected a non-empty string.', 400);
+            }
+        } else {
+            $item['identifier'] = QUI\Utils\Uuid::get();
         }
 
-        $item['title'] = self::normalizeLocaleMap($item['title']);
-
-        if (isset($item['identifier']) && (!is_string($item['identifier']) || $item['identifier'] === '')) {
-            throw new Exception('Menu item identifier must be a non-empty string.', 400);
+        if (array_key_exists('icon', $item) && !is_string($item['icon'])) {
+            throw new Exception($path . '.icon: expected a string.', 400);
         }
 
-        if (!isset($item['identifier'])) {
-            $item['identifier'] = \QUI\Utils\Uuid::get();
-        }
-
-        if (isset($item['icon']) && !is_string($item['icon'])) {
-            throw new Exception('Menu item icon must be a string.', 400);
-        }
-
-        if (!isset($item['data']) || !is_array($item['data'])) {
+        if (!array_key_exists('data', $item)) {
             $item['data'] = [];
         }
 
-        self::validateTypeData($item['type'], $item['data']);
-
-        if (isset($item['children']) && !is_array($item['children'])) {
-            throw new Exception('Menu item children must be an array.', 400);
+        if (!is_array($item['data'])) {
+            throw new Exception($path . '.data: expected an object.', 400);
         }
 
-        if (isset($item['children'])) {
-            $item['children'] = array_map(
-                static fn(array $child): array => self::normalizeInputItem($child),
-                $item['children']
-            );
+        $schema = self::getItemDataSchema($item['type']);
+        self::validateKeys($item['data'], array_keys($schema['properties']), $path . '.data');
+
+        foreach ($schema['required'] as $key) {
+            if (!array_key_exists($key, $item['data'])) {
+                throw new Exception($path . '.data.' . $key . ': required field.', 400);
+            }
+        }
+
+        foreach ($item['data'] as $key => $value) {
+            $fieldPath = $path . '.data.' . $key;
+            if (in_array($key, ['name', 'short'], true) || ($key === 'url' && $item['type'] === Anchor::class)) {
+                $item['data'][$key] = LocalizedValue::encode($value, $fieldPath);
+            } elseif ($key === 'url' && is_array($value)) {
+                $item['data'][$key] = LocalizedValue::encode($value, $fieldPath);
+            } elseif (isset($schema['properties'][$key]['enum'])) {
+                if (!in_array($value, $schema['properties'][$key]['enum'], true)) {
+                    throw new Exception($fieldPath . ': invalid value.', 400);
+                }
+            } elseif (!is_string($value)) {
+                throw new Exception($fieldPath . ': expected a string.', 400);
+            }
+        }
+
+        if (array_key_exists('children', $item)) {
+            $item['children'] = self::normalizeChildren($item['children'], $path . '.children', $depth + 1);
         }
 
         return $item;
@@ -229,41 +252,63 @@ abstract class AbstractTool implements ToolInterface
 
     /**
      * @param array<string, mixed> $data
-     * @throws Exception
+     * @param list<array-key> $keys
      */
-    protected static function validateTypeData(string $type, array $data): void
+    protected static function validateKeys(array $data, array $keys, string $path): void
     {
-        self::validateCommonData($data);
+        foreach ($data as $key => $_) {
+            if (!in_array($key, $keys, true)) {
+                throw new Exception($path . '.' . $key . ': unsupported field.', 400);
+            }
+        }
+    }
 
-        if ($type === Site::class && !isset($data['site'])) {
-            throw new Exception('Site menu items require data.site.', 400);
+    /** @return list<array<string, mixed>> */
+    protected static function normalizeChildren(mixed $children, string $path, int $depth = 0): array
+    {
+        if (!is_array($children) || !array_is_list($children)) {
+            throw new Exception($path . ': expected an ordered array of menu items.', 400);
         }
 
-        if ($type === Url::class && !isset($data['url'])) {
-            throw new Exception('URL menu items require data.url.', 400);
+        $result = [];
+        foreach ($children as $index => $child) {
+            if (!is_array($child)) {
+                throw new Exception($path . '[' . $index . ']: expected a menu item object.', 400);
+            }
+
+            $result[] = self::normalizeInputItem($child, $path . '[' . $index . ']', $depth);
         }
 
-        if ($type === Anchor::class && (!isset($data['site']) || !isset($data['url']))) {
-            throw new Exception('Anchor menu items require data.site and data.url.', 400);
-        }
+        return $result;
     }
 
     /**
      * @param array<string, mixed> $data
-     * @throws Exception
+     * @return array{children: list<array<string, mixed>>}
      */
-    protected static function validateCommonData(array $data): void
+    protected static function normalizeMenuData(array $data): array
     {
-        if (isset($data['target']) && !in_array($data['target'], self::TARGET_VALUES, true)) {
-            throw new Exception('Invalid menu item target.', 400, ['target' => $data['target']]);
-        }
+        self::validateKeys($data, ['children'], 'data');
+        $children = self::normalizeChildren($data['children'] ?? null, 'data.children');
+        $identifiers = [];
+        self::validateIdentifiers($children, $identifiers, 'data.children');
+        return ['children' => $children];
+    }
 
-        if (isset($data['rel']) && !in_array($data['rel'], self::REL_VALUES, true)) {
-            throw new Exception('Invalid menu item rel value.', 400, ['rel' => $data['rel']]);
-        }
+    /**
+     * @param list<array<string, mixed>> $children
+     * @param array<array-key, true> $identifiers
+     */
+    private static function validateIdentifiers(array $children, array &$identifiers, string $path): void
+    {
+        foreach ($children as $index => $child) {
+            $itemPath = $path . '[' . $index . ']';
+            if (isset($identifiers[$child['identifier']])) {
+                throw new Exception($itemPath . '.identifier: duplicate menu item identifier.', 400);
+            }
 
-        if (isset($data['menuType']) && !in_array($data['menuType'], self::MENU_TYPE_VALUES, true)) {
-            throw new Exception('Invalid menu item menuType.', 400, ['menuType' => $data['menuType']]);
+            $identifiers[$child['identifier']] = true;
+            self::validateIdentifiers($child['children'] ?? [], $identifiers, $itemPath . '.children');
         }
     }
 
@@ -284,25 +329,101 @@ abstract class AbstractTool implements ToolInterface
 
     /**
      * @param array<string, mixed> $data
+     * @param array<string, mixed>|null $title
+     * @param array<string, mixed>|null $workingTitle
      * @return array<string, mixed>
-     *
-     * @throws Exception
      */
-    protected static function saveMenuData(Menu $Menu, array $data): array
-    {
-        $sanitized = $Menu->sanitizeData($data);
-
-        if ($sanitized !== $data) {
-            throw new Exception('Invalid menu data. The menu was not saved.', 400, [
-                'data' => $data,
-                'sanitized' => $sanitized
-            ]);
+    protected static function saveMenuData(
+        Menu $Menu,
+        array $data,
+        ?array $title = null,
+        ?array $workingTitle = null,
+        bool $create = false
+    ): array {
+        $User = Server::getRequestUser();
+        Permission::checkPermission('quiqqer.menu.edit', $User);
+        if ($create) {
+            Permission::checkPermission('quiqqer.menu.create', $User);
         }
 
-        $Menu->setData($data);
-        $Menu->save(Server::getRequestUser());
+        // Work on a separate candidate. Never mutate the caller's menu on failure.
+        $candidate = $Menu->getData();
+        $candidate['title'] ??= [];
+        $candidate['workingTitle'] ??= [];
+        $candidate['data'] = self::normalizeMenuData($data);
+        $Candidate = new Menu($candidate);
+        $Candidate->setTitle($title === null ? null : LocalizedValue::decode($title, 'title'));
+        $Candidate->setWorkingTitle(
+            $workingTitle === null ? null : LocalizedValue::decode($workingTitle, 'workingTitle')
+        );
 
-        return self::parseMenu(Handler::getMenu($Menu->getId()), true);
+        $row = $Candidate->getData();
+        unset($row['id']);
+        foreach ($row as $key => $value) {
+            $row[$key] = json_encode($value, JSON_THROW_ON_ERROR);
+        }
+
+        // Exercise the actual storage representation and response rendering before any write.
+        json_encode(self::parseMenu(new Menu(['id' => $Menu->getId()] + $row), true), JSON_THROW_ON_ERROR);
+        $Connection = QUI::getDataBaseConnection();
+        if ($Connection->isTransactionActive()) {
+            throw new Exception('Menu writes require their own transaction.', 409);
+        }
+
+        [$savedMenu, $result] = $Connection->transactional(static function () use ($Connection, $Menu, $row, $create): array {
+            $table = Doctrine::quoteIdentifier(Handler::table());
+            if ($create) {
+                $Connection->insert($table, $row);
+                $id = (int)$Connection->lastInsertId();
+            } else {
+                $id = $Menu->getId();
+                $Connection->update($table, $row, ['id' => $id]);
+            }
+
+            $stored = Handler::getMenuData($id);
+            foreach ($row as $key => $value) {
+                if ($stored[$key] !== $value) {
+                    throw new Exception($key . ': stored menu differs from the validated candidate.', 500);
+                }
+            }
+
+            $Saved = new Menu($stored);
+            // A failed reload or response serialization rolls the database change back.
+            $result = self::parseMenu($Saved, true);
+            json_encode($result, JSON_THROW_ON_ERROR);
+            return [$Saved, $result];
+        });
+
+        // Only notifications and cache invalidation happen after commit.
+        $result['saved'] = true;
+        $actions = [
+            static fn() => QUI::getEvents()->fireEvent('quiqqerMenuIndependentSave', [$savedMenu]),
+            static fn() => QUI\Cache\Manager::clear(Handler::getMenuCacheName($savedMenu->getId())),
+            static fn() => QUI::getEvents()->fireEvent('quiqqerMenuIndependentClear', [$savedMenu->getId()])
+        ];
+        if ($create) {
+            array_unshift($actions, static fn() => QUI::getEvents()->fireEvent('quiqqerMenuIndependentCreate', [$savedMenu]));
+        }
+
+        foreach ($actions as $action) {
+            try {
+                $action();
+            } catch (Throwable $Exception) {
+                $result['warnings'][] = 'Menu was saved; post-save notification/cache refresh failed: '
+                    . $Exception->getMessage();
+            }
+        }
+
+        return $result;
+    }
+
+    protected static function writeFailure(Throwable $Exception): CallToolResult
+    {
+        return ToolHelper::parseExceptionToResult(new Exception(
+            'No changes saved. ' . $Exception->getMessage(),
+            $Exception->getCode() ?: 400,
+            ['saved' => false]
+        ));
     }
 
     /**
@@ -358,6 +479,8 @@ abstract class AbstractTool implements ToolInterface
      */
     protected static function updateItemInData(array $data, string $identifier, array $patch): array
     {
+        self::validateKeys($patch, ['type', 'title', 'icon', 'data', 'children'], 'patch');
+
         if (!self::updateItemByIdentifier($data['children'], $identifier, $patch)) {
             throw new Exception('Menu item was not found.', 404, ['identifier' => $identifier]);
         }
@@ -449,9 +572,13 @@ abstract class AbstractTool implements ToolInterface
      * @param array<array-key, array<string, mixed>> $children
      * @param array<string, mixed> $patch
      */
-    protected static function updateItemByIdentifier(array &$children, string $identifier, array $patch): bool
-    {
-        foreach ($children as &$child) {
+    protected static function updateItemByIdentifier(
+        array &$children,
+        string $identifier,
+        array $patch,
+        string $path = 'data.children'
+    ): bool {
+        foreach ($children as $index => &$child) {
             if (($child['identifier'] ?? null) === $identifier) {
                 foreach (['type', 'title', 'icon', 'data', 'children'] as $key) {
                     if (array_key_exists($key, $patch)) {
@@ -459,12 +586,12 @@ abstract class AbstractTool implements ToolInterface
                     }
                 }
 
-                $child = self::normalizeInputItem($child);
+                $child = self::normalizeInputItem($child, $path . '[' . $index . ']');
                 return true;
             }
 
             if (isset($child['children']) && is_array($child['children'])) {
-                if (self::updateItemByIdentifier($child['children'], $identifier, $patch)) {
+                if (self::updateItemByIdentifier($child['children'], $identifier, $patch, $path . '[' . $index . '].children')) {
                     return true;
                 }
             }
@@ -532,13 +659,13 @@ abstract class AbstractTool implements ToolInterface
         }
 
         if ($type === Url::class) {
-            $properties['url'] = ['type' => 'string', 'description' => 'External or internal URL.'];
+            $properties['url'] = self::urlSchema('External or internal URL, optionally keyed by language.');
             $properties['name'] = self::localizedMapSchema('Optional link text override.');
             $required[] = 'url';
         }
 
         if ($type === Custom::class) {
-            $properties['url'] = ['type' => 'string', 'description' => 'Optional URL.'];
+            $properties['url'] = self::urlSchema('Optional URL, optionally keyed by language.');
             $properties['name'] = self::localizedMapSchema('Optional link text override.');
             $properties['short'] = self::localizedMapSchema('Optional short text.');
             $properties['click'] = ['type' => 'string', 'description' => 'Optional click handler value.'];
@@ -569,6 +696,18 @@ abstract class AbstractTool implements ToolInterface
             'target' => ['type' => 'string', 'enum' => self::TARGET_VALUES],
             'rel' => ['type' => 'string', 'enum' => self::REL_VALUES],
             'menuType' => ['type' => 'string', 'enum' => self::MENU_TYPE_VALUES]
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    protected static function urlSchema(string $description): array
+    {
+        return [
+            'description' => $description,
+            'anyOf' => [
+                ['type' => 'string'],
+                self::localizedMapSchema('URLs keyed by language.')
+            ]
         ];
     }
 
