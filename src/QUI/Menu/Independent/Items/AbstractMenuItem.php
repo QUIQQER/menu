@@ -4,6 +4,7 @@ namespace QUI\Menu\Independent\Items;
 
 use QUI;
 use QUI\Locale;
+use QUI\Menu\Independent\LocalizedValue;
 
 use function array_filter;
 use function array_values;
@@ -47,18 +48,18 @@ abstract class AbstractMenuItem
      */
     public function getTitle(null | Locale $Locale = null): string
     {
+        $title = LocalizedValue::decodeForRead($this->attributes['title'] ?? null, 'title');
+
+        if (is_string($title)) {
+            return $title;
+        }
+
         if ($Locale === null) {
             $Locale = QUI::getLocale();
         }
 
         $current = $Locale->getCurrent();
-        $title = $this->attributes['title'];
-
-        if (is_string($title)) {
-            $title = json_decode($title, true);
-        }
-
-        if (is_array($title) && isset($title[$current]) && is_string($title[$current])) {
+        if (isset($title[$current])) {
             return $title[$current];
         }
 
@@ -288,8 +289,8 @@ abstract class AbstractMenuItem
         }
 
         $url = $this->getUrl();
-        $title = $this->getTitle($Locale);
-        $name = $this->getName($Locale);
+        $title = htmlspecialchars($this->getTitle($Locale), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $name = htmlspecialchars($this->getName($Locale), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         $relValue = $this->getRel();
 
         // rel attribute
