@@ -107,17 +107,20 @@ class Menu
      * @param array<array-key, array<string, mixed>> $children
      * @return void
      */
-    protected function buildChildren(AbstractMenuItem | Menu $Parent, array $children): void
-    {
-        foreach ($children as $item) {
+    protected function buildChildren(
+        AbstractMenuItem | Menu $Parent,
+        array $children,
+        string $path = 'data.children'
+    ): void {
+        foreach ($children as $index => $item) {
             $type = $item['type'] ?? null;
 
             if (!is_string($type) || !class_exists($type)) {
                 continue;
             }
 
-            if (isset($item['title'])) {
-                $item['title'] = json_decode($item['title'], true);
+            if (array_key_exists('title', $item)) {
+                $item['title'] = LocalizedValue::decode($item['title'], $path . '[' . $index . '].title');
             }
 
             $Item = new $type($item);
@@ -129,7 +132,7 @@ class Menu
             $Parent->appendChild($Item);
 
             if (isset($item['children']) && is_array($item['children'])) {
-                $this->buildChildren($Item, $item['children']);
+                $this->buildChildren($Item, $item['children'], $path . '[' . $index . '].children');
             }
         }
     }

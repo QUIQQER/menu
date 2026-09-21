@@ -8,8 +8,6 @@ namespace QUI\Menu\MCP\Independent;
 
 use Mcp\Schema\Result\CallToolResult;
 use Mcp\Server\Builder;
-use QUI\AI\MCP\Server;
-use QUI\AI\MCP\ToolHelper;
 use QUI\Menu\Independent\Handler;
 use QUI\Menu\MCP\AbstractTool;
 use Throwable;
@@ -29,16 +27,16 @@ class UpdateMenu extends AbstractTool
                     self::checkMenuMcpPermission();
 
                     $Menu = Handler::getMenu($id);
-                    $Menu->setTitle($title);
-                    $Menu->setWorkingTitle($workingTitle);
-                    $Menu->setData($data);
-                    $Menu->save(Server::getRequestUser());
-
                     return [
-                        'menu' => self::parseMenu(Handler::getMenu($id), true)
+                        'menu' => self::saveMenuData(
+                            $Menu,
+                            $data ?? self::getMenuDataTree($Menu),
+                            $title,
+                            $workingTitle
+                        )
                     ];
                 } catch (Throwable $Exception) {
-                    return ToolHelper::parseExceptionToResult($Exception);
+                    return self::writeFailure($Exception);
                 }
             },
             name: 'quiqqer_menu_update',
@@ -61,7 +59,7 @@ class UpdateMenu extends AbstractTool
                     ],
                     'data' => [
                         'type' => 'object',
-                        'description' => 'Menu data. Use a children array with supported item type class names.'
+                        'description' => 'Complete replacement tree: {children: [...]}. Item titles and localized data fields accept language objects or legacy JSON strings. Use quiqqer_menu_item_types for item schemas. Omit data to preserve existing items.'
                     ]
                 ]
             ]
