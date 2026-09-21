@@ -161,7 +161,7 @@ class MenuWriteTest extends TestCase
 
     public function testInvalidNestedDataLeavesDatabaseFrontendAndCacheUnchanged(): void
     {
-        $badValues = [null, 42, ['de' => ['bad']], '{invalid', 'null', '["bad"]', 'Startseite'];
+        $badValues = [null, false, 42, ['de' => ['bad']], '{invalid', 'null', 'false', '["bad"]', 'Startseite'];
         foreach ($badValues as $value) {
             $child = $this->item('child');
             $child['title'] = $value;
@@ -231,6 +231,47 @@ class MenuWriteTest extends TestCase
         $this->assertCount(1, $menus);
         $this->assertSame('FAQ', $menus[0]->getChildren()[0]->getTitle(new QUI\Locale('de')));
         $this->assertSame('Child', Handler::getMenu(1)->getChildren()[0]->getChildren()[0]->getTitle(new QUI\Locale('en')));
+    }
+
+    public function testBackendListAndFrontendLoadLegacySiteTitlesInMixedMenu(): void
+    {
+        $children = [];
+        foreach ([6, 32, 33, 20, 179, 304] as $siteId) {
+            $children[] = [
+                'title' => false,
+                'identifier' => 'legacy-site-' . $siteId,
+                'data' => [
+                    'site' => 'index.php?id=' . $siteId . '&project=test&lang=de',
+                    'target' => '',
+                    'menuType' => '',
+                    'status' => 1,
+                    'rel' => ''
+                ],
+                'icon' => false,
+                'type' => \QUI\Menu\Independent\Items\Site::class
+            ];
+        }
+        $children[3]['type'] = Custom::class;
+        $children[3]['title'] = '{"de":"FAQ"}';
+        $children[3]['data'] = ['url' => '/faq', 'name' => '{"de":"FAQ"}', 'status' => 1];
+        $children[4]['type'] = \QUI\Menu\Independent\Items\Anchor::class;
+        $children[4]['title'] = '{"de":"Ressourcen & Downloads"}';
+        $children[4]['data']['url'] = '{"de":""}';
+        $data = json_encode(['children' => $children], JSON_THROW_ON_ERROR);
+        $this->Connection->update(Handler::table(), ['data' => $data], ['id' => 1]);
+        $German = $this->createConfiguredMock(QUI\Locale::class, ['getCurrent' => 'de']);
+
+        $menus = Handler::getList();
+        $this->assertCount(1, $menus);
+        foreach ([$menus[0], Handler::getMenu(1)] as $Menu) {
+            $items = $Menu->getChildren();
+            $this->assertCount(6, $items);
+            $this->assertInstanceOf(\QUI\Menu\Independent\Items\Site::class, $items[0]);
+            $this->assertSame('FAQ', $items[3]->getTitle($German));
+            $this->assertSame('Ressourcen & Downloads', $items[4]->getTitle($German));
+            $this->assertSame($children, $Menu->getData()['data']['children']);
+        }
+        $this->assertSame($data, Handler::getMenuData(1)['data']);
     }
 
     private function call(string $name, array $arguments): array | CallToolResult
