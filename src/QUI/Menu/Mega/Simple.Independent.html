@@ -15,7 +15,7 @@
                 {/if}
 
                 <span class="quiqqer-menu-megaMenu-children-simple-entry-title">
-                    {$Child->getTitle()}
+                    {$Child->getTitle()|escape:'html'}
                 </span>
 
                 {if $Child->getShort()}
@@ -33,7 +33,7 @@
                 {/if}
 
                 <span class="quiqqer-menu-megaMenu-children-simple-entry-title">
-                    {$Child->getTitle()}
+                    {$Child->getTitle()|escape:'html'}
                 </span>
 
                 {if $Child->getShort()}

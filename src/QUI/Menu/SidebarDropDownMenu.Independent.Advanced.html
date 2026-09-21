@@ -40,12 +40,12 @@
                                 {if !count($subnavigation)} quiqqer-navigation-link-no-icon{/if}"
                                title="{$Child->getTitleAttribute()|escape:'html'}"
                                {if $Child->getTarget()}target="{$Child->getTarget()}"{/if}>
-                                {$Child->getTitle()}
+                                {$Child->getTitle()|escape:'html'}
                             </a>
                         {else}
                             <span class="quiqqer-navigation-link {if !count($subnavigation)} quiqqer-navigation-link-no-icon{/if}"
                                   title="{$Child->getTitleAttribute()|escape:'html'}">
-                                {$Child->getTitle()}
+                                {$Child->getTitle()|escape:'html'}
                             </span>
                         {/if}
 

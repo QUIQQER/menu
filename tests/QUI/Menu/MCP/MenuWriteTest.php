@@ -161,7 +161,7 @@ class MenuWriteTest extends TestCase
 
     public function testInvalidNestedDataLeavesDatabaseFrontendAndCacheUnchanged(): void
     {
-        $badValues = [null, 42, ['de' => ['bad']], '{invalid', 'null', '["bad"]'];
+        $badValues = [null, 42, ['de' => ['bad']], '{invalid', 'null', '["bad"]', 'Startseite'];
         foreach ($badValues as $value) {
             $child = $this->item('child');
             $child['title'] = $value;

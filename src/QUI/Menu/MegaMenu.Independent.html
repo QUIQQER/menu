@@ -38,7 +38,7 @@
                             {image src=$Child->getIcon() onlyicon=1}
                         {/if}
 
-                        {$Child->getTitle()}
+                        {$Child->getTitle()|escape:'html'}
 
                         {if count($subchildren) && $subMenuIndicator}
                             <span class="{$subMenuIndicator}" aria-hidden="true"></span>
@@ -53,7 +53,7 @@
                         {/if}
 
 
-                        {$Child->getTitle()}
+                        {$Child->getTitle()|escape:'html'}
 
                         {if count($subchildren) && $subMenuIndicator}
                             <span class="{$subMenuIndicator}" aria-hidden="true"></span>

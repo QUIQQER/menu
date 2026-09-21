@@ -7,6 +7,42 @@ use QUI\Exception;
 /** Shared decoding for legacy JSON strings and localized MCP objects. */
 final class LocalizedValue
 {
+    /**
+     * Read legacy titles without applying the MCP write contract to plain text.
+     *
+     * @return array<string, string>|string
+     */
+    public static function decodeForRead(mixed $value, string $path): array | string
+    {
+        if ($value === null) {
+            return [];
+        }
+
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return $value;
+            }
+
+            if ($decoded === null) {
+                return [];
+            }
+
+            if (is_string($decoded)) {
+                return $decoded;
+            }
+
+            if (!is_array($decoded)) {
+                return $value;
+            }
+
+            $value = $decoded;
+        }
+
+        return self::decode($value, $path);
+    }
+
     /** @return array<string, string> */
     public static function decode(mixed $value, string $path): array
     {

@@ -120,7 +120,8 @@ class Menu
             }
 
             if (array_key_exists('title', $item)) {
-                $item['title'] = LocalizedValue::decode($item['title'], $path . '[' . $index . '].title');
+                // Keep the stored value so items decode JSON string titles only once.
+                LocalizedValue::decodeForRead($item['title'], $path . '[' . $index . '].title');
             }
 
             $Item = new $type($item);
