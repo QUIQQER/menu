@@ -48,7 +48,7 @@
                         {/if}
 
                         <span class="left-menu-text">
-                            {$Child->getTitle()}
+                            {$Child->getTitle()|escape:'html'}
                         </span>
                     </a>
                 {else}
@@ -74,7 +74,7 @@
                         {/if}
 
                         <span class="left-menu-text">
-                            {$Child->getTitle()}
+                            {$Child->getTitle()|escape:'html'}
                         </span>
                     </span>
                 {/if}

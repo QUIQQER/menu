@@ -28,7 +28,7 @@
                             {if $icon}
                                 <span class="{$icon} fa-fw qui-menu-urlList__linkIcon"></span>
                             {/if}
-                            <span class="qui-menu-urlList__linkText">{$Child->getTitle()}</span>
+                            <span class="qui-menu-urlList__linkText">{$Child->getTitle()|escape:'html'}</span>
                         </a>
                     {else}
                         <span class="qui-menu-urlList__link"
@@ -38,7 +38,7 @@
                             {if $icon}
                                 <span class="{$icon} fa-fw qui-menu-urlList__linkIcon"></span>
                             {/if}
-                            <span class="qui-menu-urlList__linkText">{$Child->getTitle()}</span>
+                            <span class="qui-menu-urlList__linkText">{$Child->getTitle()|escape:'html'}</span>
                         </span>
                     {/if}
                 </li>

@@ -18,7 +18,7 @@
                                     {/if}
                                 </div>
                             {/if}
-                            <span class="quiqqer-submenu__label">{$Child->getTitle()}</span>
+                            <span class="quiqqer-submenu__label">{$Child->getTitle()|escape:'html'}</span>
                         </a>
                     {else}
                         <span class="quiqqer-submenu__link"
@@ -32,7 +32,7 @@
                                     {/if}
                                 </div>
                             {/if}
-                            <span class="quiqqer-submenu__label">{$Child->getTitle()}</span>
+                            <span class="quiqqer-submenu__label">{$Child->getTitle()|escape:'html'}</span>
                         </span>
                     {/if}
                 </li>
@@ -40,4 +40,3 @@
         </ul>
     {/if}
 {/strip}
-

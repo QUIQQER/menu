@@ -29,7 +29,7 @@
                            {if $Child->getTarget()}target="{$Child->getTarget()}"{/if}
                             >
                             <span class="quiqqer-slideoutAdvanced-nav-entry-title">
-                                {$Child->getTitle()}
+                                {$Child->getTitle()|escape:'html'}
                             </span>
                         </a>
 
@@ -42,7 +42,7 @@
                               {if $Child->getType() ==='QUI\Menu\Independent\Items\Custom' && $Child->getClickEvent()}onclick="{$Child->getClickEvent()}" data-name="custom-event"{/if}
                         >
                             <span class="quiqqer-slideoutAdvanced-nav-entry-title">
-                                {$Child->getTitle()}
+                                {$Child->getTitle()|escape:'html'}
                             </span>
                         </span>
 
