@@ -8,7 +8,12 @@ if (!defined('QUIQQER_AJAX')) {
     define('QUIQQER_AJAX', true);
 }
 
-require_once __DIR__ . '/../../../../bootstrap.php';
+$isolatedBootstrap = __DIR__ . '/../../core/tests/runtime-bootstrap.php';
+if (getenv('GITLAB_CI') !== 'true' && is_file($isolatedBootstrap)) {
+    require_once $isolatedBootstrap;
+} else {
+    require_once __DIR__ . '/../../../../bootstrap.php';
+}
 require_once __DIR__ . '/stubs/Mcp/Server/Builder.php';
 require_once __DIR__ . '/stubs/Mcp/Schema/Result/CallToolResult.php';
 require_once __DIR__ . '/stubs/QUI/AI/MCP/ProviderInterface.php';

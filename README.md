@@ -39,6 +39,19 @@ backend.
 - Requires `quiqqer/core ^2`
 - Uses package-local development tools from `./tools/`
 
+### MCP menu writes
+
+Create, update and item tools validate the complete nested tree before writing.
+Localized item fields accept language objects or legacy JSON strings and are
+serialized to the existing storage format. `get.data` can be passed back to
+`update.data`; it replaces the complete tree. Omit `data` for title-only updates.
+The top-level menu title is separate from each item's localized title.
+
+Validation errors include the field path and report `No changes saved`.
+Writes and their verification run in one database transaction. Events and cache
+invalidation run after commit; failures at that stage return `saved: true` with
+warnings instead of reporting the write as failed.
+
 ## Support
 
 - Issues: https://dev.quiqqer.com/quiqqer/menu/-/issues

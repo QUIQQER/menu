@@ -8,6 +8,25 @@ use QUI\Menu\Independent\Menu;
 
 class MenuTest extends TestCase
 {
+    public function testInvalidNestedTitleReportsItsFieldInsteadOfATypeError(): void
+    {
+        $this->expectException(\QUI\Exception::class);
+        $this->expectExceptionMessage('data.children[0].children[0].title');
+        new Menu([
+            'id' => 1,
+            'title' => [],
+            'workingTitle' => [],
+            'data' => ['children' => [[
+                'type' => Url::class,
+                'title' => '{"de":"Parent"}',
+                'children' => [[
+                    'type' => Url::class,
+                    'title' => ['de' => 42]
+                ]]
+            ]]]
+        ]);
+    }
+
     public function testSanitizeDataKeepsExistingIdentifiers(): void
     {
         $Menu = $this->createMenu();

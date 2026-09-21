@@ -5,6 +5,8 @@ namespace Mcp\Server;
 if (!class_exists(Builder::class)) {
     class Builder
     {
+        public array $tools = [];
+
         /**
          * @param callable $callback
          * @param array<string, mixed>|null $inputSchema
@@ -15,6 +17,7 @@ if (!class_exists(Builder::class)) {
             string $description,
             ?array $inputSchema = null
         ): void {
+            $this->tools[] = ['handler' => $callback, 'name' => $name];
         }
     }
 }

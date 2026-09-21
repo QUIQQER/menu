@@ -8,7 +8,6 @@ namespace QUI\Menu\MCP\Independent;
 
 use Mcp\Schema\Result\CallToolResult;
 use Mcp\Server\Builder;
-use QUI\AI\MCP\ToolHelper;
 use QUI\Menu\Independent\Handler;
 use QUI\Menu\MCP\AbstractTool;
 use Throwable;
@@ -33,7 +32,7 @@ class UpdateMenuItem extends AbstractTool
                         'menu' => self::saveMenuData($Menu, $data)
                     ];
                 } catch (Throwable $Exception) {
-                    return ToolHelper::parseExceptionToResult($Exception);
+                    return self::writeFailure($Exception);
                 }
             },
             name: 'quiqqer_menu_item_update',
