@@ -14,7 +14,8 @@ final class LocalizedValue
      */
     public static function decodeForRead(mixed $value, string $path): array | string
     {
-        if ($value === null) {
+        // Legacy Site controls can store false for their unused localized title.
+        if ($value === null || $value === false) {
             return [];
         }
 
@@ -25,7 +26,7 @@ final class LocalizedValue
                 return $value;
             }
 
-            if ($decoded === null) {
+            if ($decoded === null || $decoded === false) {
                 return [];
             }
 
