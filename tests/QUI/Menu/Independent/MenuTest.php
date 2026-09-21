@@ -7,6 +7,7 @@ use PHPUnit\Framework\TestCase;
 use QUI\Locale;
 use QUI\Menu\Independent\Items\Anchor;
 use QUI\Menu\Independent\Items\Custom;
+use QUI\Menu\Independent\Items\Site;
 use QUI\Menu\Independent\Items\Url;
 use QUI\Menu\Independent\Menu;
 
@@ -18,6 +19,9 @@ class MenuTest extends TestCase
             'plain text' => ['Startseite', 'Startseite', 'Startseite'],
             'empty' => ['', '', ''],
             'null' => [null, '', ''],
+            'false' => [false, '', ''],
+            'JSON false' => ['false', '', ''],
+            'JSON string false' => ['"false"', 'false', 'false'],
             'JSON null' => ['null', '', ''],
             'JSON string' => ['"Startseite"', 'Startseite', 'Startseite'],
             'JSON string null' => ['"null"', 'null', 'null'],
@@ -62,6 +66,19 @@ class MenuTest extends TestCase
     public function testMissingTitleIsEmpty(): void
     {
         $this->assertSame('', (new Url())->getTitle(new Locale('de')));
+    }
+
+    public function testSiteWithFalseTitleUsesTheLinkedSiteTitle(): void
+    {
+        $Page = $this->createMock(\QUI\Projects\Site::class);
+        $Page->method('getAttribute')->with('title')->willReturn('Linked page title');
+        $Item = $this->getMockBuilder(Site::class)
+            ->setConstructorArgs([['title' => false]])
+            ->onlyMethods(['getSite'])
+            ->getMock();
+        $Item->method('getSite')->willReturn($Page);
+
+        $this->assertSame('Linked page title', $Item->getTitle());
     }
 
     public function testPlainTitleIsEscapedWhenRenderingHtml(): void
