@@ -28,7 +28,8 @@ class MegaMenuTest extends TestCase
             return is_object($entry) === false;
         });
 
-        $cacheKey = EventHandler::menuCacheName() . '/megaMenu/' . md5(serialize($attributes));
+        $cacheKey = EventHandler::menuCacheName() . '/megaMenu/' . md5(serialize($attributes))
+            . '/' . EventHandler::htmlCacheContext();
         $cachedResult = [
             'subMenus' => [],
             'html' => 'cached-mega-menu'
