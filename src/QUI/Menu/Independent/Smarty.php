@@ -35,7 +35,8 @@ class Smarty
         }
 
         $menuId = (int)$params['id'];
-        $cacheName = Handler::getMenuCacheName($menuId, $Project);
+        $cacheName = Handler::getMenuCacheName($menuId, $Project)
+            . '/' . QUI\Menu\EventHandler::htmlCacheContext();
 
         try {
             return QUI\Cache\Manager::get($cacheName);

@@ -30,6 +30,18 @@ class EventHandler
     }
 
     /**
+     * Vary rendered HTML by request-dependent image and other output settings.
+     * Listeners add serializable values without requiring an optional package.
+     */
+    public static function htmlCacheContext(): string
+    {
+        $context = [];
+        QUI::getEvents()->fireEvent('quiqqerMenuHtmlCacheContext', [&$context]);
+
+        return 'html-v2/' . md5(serialize($context));
+    }
+
+    /**
      * @param Site $Site
      */
     public static function onSiteSave(Site $Site): void

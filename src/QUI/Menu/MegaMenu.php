@@ -114,7 +114,7 @@ class MegaMenu extends AbstractMenu
             $siteCachePath = $this->getSite()->getCachePath();
         }
 
-        $cache .= md5($siteCachePath . serialize($attributes));
+        $cache .= md5($siteCachePath . serialize($attributes)) . '/' . EventHandler::htmlCacheContext();
         $childControl = $this->getMenuControl($this->getAttribute('display'));
 
         $showMenuDelay = 0;

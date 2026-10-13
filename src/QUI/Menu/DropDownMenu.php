@@ -59,7 +59,7 @@ class DropDownMenu extends QUI\Control
             $siteCachePath = $this->getSite()->getCachePath();
         }
 
-        $cache .= md5($siteCachePath . serialize($attributes));
+        $cache .= md5($siteCachePath . serialize($attributes)) . '/' . EventHandler::htmlCacheContext();
 
         try {
             return QUI\Cache\Manager::get($cache);
